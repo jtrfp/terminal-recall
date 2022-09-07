@@ -389,7 +389,7 @@ public class VQTexture implements Texture {
     
     void freeCodebook256(int codebook256){
 	cbm.freeCodebook256(codebook256);
-	if(!getCodebookStartOffsets256().remove(new Integer(codebook256)))
+	if(!getCodebookStartOffsets256().remove(Integer.valueOf(codebook256)))
 	    throw new IllegalStateException("Specified codebook256 index was not found: "+codebook256);
     }
 

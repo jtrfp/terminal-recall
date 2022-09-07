@@ -242,6 +242,7 @@ public class NAVRadarBlipFactory implements NAVRadarBlipFactoryListener {
 	newlyEnabledBlips.clear();
 	newlyEnabledBlips.addAll(newActiveBlips);
 	newlyEnabledBlips.removeAll(oldActiveBlips);
+	@SuppressWarnings("unchecked")
 	final Collection<Blip> disabledBlips = CollectionUtils.subtract(oldActiveBlips, newActiveBlips);
 	if(CollectionUtils.containsAny(newlyEnabledBlips, disabledBlips))
 	    throw new RuntimeException("Enabled and disabled contain same");

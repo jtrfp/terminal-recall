@@ -230,7 +230,7 @@ public class IndexListTest {
 	    assertEquals(i,dest.get(i).intValue());
     }
     
-    private void depopulate(IndexList subject, List<Integer> list){
+    private void depopulate(IndexList<Object> subject, List<Integer> list){
 	for(int i:list)
 	    subject.free(i);
 	assertEquals(0,subject.getNumUsedIndices());

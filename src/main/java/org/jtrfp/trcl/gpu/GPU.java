@@ -50,14 +50,14 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
     	@Getter(lazy=true)
     	private final int				defaultTIU = generateDefaultTIU();
 	
-	private ByteOrder 				byteOrder;
+	//private ByteOrder 				byteOrder;
 	//private final TR 				tr;
 	private GL3 					gl;
 	public TRFutureTask<MemoryManager> 	        memoryManager;
 	public TRFutureTask<TextureManager>        	textureManager;
 	private GPUVendor				vendor=null;
 	public TRFutureTask<RendererFactory>      	rendererFactory;
-	private GLExecutor		         	glExecutor;
+	private GLExecutor<GL3>		         	glExecutor;
 	private GLAutoDrawable				autoDrawable;
 	public         TRFutureTask<MatrixWindow> 	matrixWindow;
 	public    TRFutureTask<ObjectListWindow> 	objectListWindow;
@@ -87,7 +87,7 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 		    "world");
 	    
 	    final ExecutorService          executorService = getExecutorService();
-	    final GLExecutor               glExecutor = getGlExecutor();
+	    final GLExecutor<GL3>          glExecutor = getGlExecutor();
 	    final ThreadManager            threadManager = getThreadManager();
 	    final UncaughtExceptionHandler exceptionHandler = getUncaughtExceptionHandler();
 	    final GLAutoDrawable           autoDrawable = getAutoDrawable();
@@ -313,11 +313,11 @@ public class GPU {//TODO: Can we remove GLExecutor? submitToGL returns GL Task w
 	    this.executorService = executorService;
 	}
 
-	public GLExecutor getGlExecutor() {
+	public GLExecutor<GL3> getGlExecutor() {
 	    return glExecutor;
 	}
 
-	public void setGlExecutor(GLExecutor glExecutor) {
+	public void setGlExecutor(GLExecutor<GL3> glExecutor) {
 	    this.glExecutor = glExecutor;
 	}
 

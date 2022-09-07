@@ -18,10 +18,9 @@ package org.jtrfp.trcl.snd;
 
 import java.util.Collection;
 
-import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.GL3;
-
 import org.jtrfp.trcl.core.TRFactory.TR;
+
+import com.jogamp.opengl.GL3;
 
 public interface SoundEvent {
     public double getStartRealtimeSeconds();

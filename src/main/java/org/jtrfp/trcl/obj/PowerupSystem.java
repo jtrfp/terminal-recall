@@ -21,7 +21,7 @@ public class PowerupSystem extends RenderableSpacePartitioningGrid{
     public PowerupSystem(TR tr){
 	super();
 	for(Powerup p:Powerup.values()){
-	    factories[p.ordinal()]=new PowerupFactory(tr, p, this);
+	    factories[p.ordinal()]=new PowerupFactory(p, this);
 	}//end for(Powerups)
     }//end constructor
     

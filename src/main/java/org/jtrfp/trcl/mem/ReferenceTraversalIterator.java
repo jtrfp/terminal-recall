@@ -85,7 +85,7 @@ public class ReferenceTraversalIterator implements Iterator<Object> {
 		try{output.put(element);}
 		catch(InterruptedException e){e.printStackTrace();}
 		alreadyVisited.add(element);
-		final Class cClass = element.getClass();
+		final Class<?> cClass = element.getClass();
 		if(cClass.isArray()){
 		    handleArray(element);
 		}else{
@@ -94,7 +94,7 @@ public class ReferenceTraversalIterator implements Iterator<Object> {
 	    }//end handleElement(...)
 	    
 	    private void handleArray(Object element){
-		final Class componentType = element.getClass().getComponentType();
+		final Class<?> componentType = element.getClass().getComponentType();
 		    if(!componentType.isPrimitive()){
 			final int size=Array.getLength(element);
 			for(int i=0; i<size; i++){
@@ -105,14 +105,14 @@ public class ReferenceTraversalIterator implements Iterator<Object> {
 		}//end handleArray
 	    
 	    private void handleClassObject(Object element) {
-		Class clazz = element.getClass();
+		Class<?> clazz = element.getClass();
 		if(clazz==null || clazz == Object.class)return;
 		do {
 			final Field[] fields = clazz.getDeclaredFields();
 			for (Field f : fields) {
 			    // System.out.println("FIELD: "+f.getType().getName()+" "+f.getName());
 			    if (!f.getType().isPrimitive()) {
-				final boolean wasAccessible = f.isAccessible();
+				final boolean wasAccessible = f.canAccess(element);
 				f.setAccessible(true);
 				try {
 				    Object obj = f.get(element);

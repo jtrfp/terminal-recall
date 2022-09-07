@@ -51,8 +51,8 @@ public class LevelSkipWindow extends JFrame {
     private final TR tr;
     private final JButton btnGo;
     private final JButton btnCancel;
-    private final JList levelList;
-    private final DefaultListModel levelLM = new DefaultListModel();
+    private final JList<String> levelList;
+    private final DefaultListModel<String> levelLM = new DefaultListModel<String>();
     private WeakReference<Game> game = null;
     private GameShell gameShell;
     private boolean setup = false;
@@ -83,7 +83,7 @@ public class LevelSkipWindow extends JFrame {
 		JScrollPane levelListSP = new JScrollPane();
 		getContentPane().add(levelListSP, BorderLayout.CENTER);
 		
-		levelList = new JList();
+		levelList = new JList<String>();
 		levelList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		levelList.setToolTipText("Select a level");
 		levelList.setModel(levelLM);

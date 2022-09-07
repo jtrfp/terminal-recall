@@ -35,7 +35,7 @@ public class GPUResidentMOD {//TODO: This class needs optimizing
     private final Module module;
     private SoundTexture [] samples;
     private double realtimeSecondsPerRow=-1;
-    private int speed=6;
+    //private int speed=6;
     private int bpm=125;
     double []panStates = new double[32];// [-1,1]
     double []volumeStates = new double[32]; // [0,1]
@@ -153,7 +153,9 @@ public class GPUResidentMOD {//TODO: This class needs optimizing
     }//end startSequence()
 
     
-    private static class EndOfSongException extends Exception{}
+    private static class EndOfSongException extends Exception{
+	private static final long serialVersionUID = 2860276658201332965L;
+	}
     
     private void setSpeedOrTempo(int op) {//UNTESTED
 	if(op >31){
@@ -167,7 +169,7 @@ public class GPUResidentMOD {//TODO: This class needs optimizing
     }//end setSpeedOrTempo()
     
     private void setInterruptLockedSpeed(int speed){
-	this.speed=speed;
+	//this.speed=speed;
 	recalculateRealtimeSecondsPerRow();
     }
     

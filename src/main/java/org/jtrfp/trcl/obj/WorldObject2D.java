@@ -13,8 +13,6 @@
 package org.jtrfp.trcl.obj;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.gpu.GL33Model;
 
 
 /**

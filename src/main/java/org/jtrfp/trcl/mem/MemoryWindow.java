@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
 
-import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.pool.IndexPool;
@@ -216,6 +215,7 @@ public abstract class MemoryWindow {
 	return getIndexPool().getMaxCapacity();
     }//end getNumObjects()
 
+    @SuppressWarnings("rawtypes")
     public static abstract class Variable<TYPE, THIS_CLASS extends Variable> {
 	private MemoryWindow parent;
 	//private int byteOffset;
@@ -236,6 +236,7 @@ public abstract class MemoryWindow {
 	    return parent;
 	}
 
+	@SuppressWarnings("unchecked")
 	private final THIS_CLASS setByteOffset(ByteAddress off) {
 	    this.byteOffset = off;
 	    return (THIS_CLASS) this;

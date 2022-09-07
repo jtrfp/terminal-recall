@@ -98,7 +98,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 	scratch.clear();
 	try{
 	    final SourceDataLine sourceDataLine = getSourceDataLine();
-	    final AudioFormat fmt = sourceDataLine.getFormat();
+	    //final AudioFormat fmt = sourceDataLine.getFormat();
 	    sourceDataLine.write(scratch.array(), 0, scratch.remaining());}
 	catch(LineUnavailableException e){throw new RuntimeException(e);}//TODO: Manage this better.
     }//end flush()

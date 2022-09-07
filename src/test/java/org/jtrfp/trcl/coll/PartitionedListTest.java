@@ -72,6 +72,7 @@ public class PartitionedListTest {
 	assertEquals(5,(int)list.get(3));
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void testRemoveSubList() {
 	List<Integer> pl0,pl1;
@@ -102,6 +103,7 @@ public class PartitionedListTest {
 	fail("Failed to throw expected IllegalStateException");
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testGetStartIndex() {
 	List<Integer> pl0,pl1;
@@ -164,6 +166,7 @@ public class PartitionedListTest {
 	}
     }//end reset(...)
     
+    @SuppressWarnings("unchecked")
     private Object partitionedGet(int i, PartitionedList<Object>.Partition ... parts){
 	int partIndex=0;
 	PartitionedList<Object>.Partition partition = parts[0];
@@ -172,6 +175,8 @@ public class PartitionedListTest {
 	return partition.get(i-partition.getStartIndex());
     }
     
+    @SafeVarargs
+    @SuppressWarnings({ "rawtypes"})
     private void testValues(ArrayList<Object> intrinsic, PartitionedList<Object>.Partition ... parts){
 	int size=0;
 	for(Partition part:parts)

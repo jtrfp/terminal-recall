@@ -38,7 +38,6 @@ import org.jtrfp.trcl.pool.ObjectPool;
 import org.jtrfp.trcl.pool.ObjectPool.GenerativeMethod;
 import org.jtrfp.trcl.pool.ObjectPool.PreparationMethod;
 
-import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -92,7 +91,7 @@ public class RendererFactory {
     private class RendererPreparationMethod implements PreparationMethod<Renderer>{
 	@Override
 	public Renderer deactivate(final Renderer obj) {
-	    final ThreadManager tm = threadManager;
+	    //final ThreadManager tm = threadManager;
 	    try {getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
 		@Override
 		public Void execute(GL3 gl) throws Exception {
@@ -104,13 +103,13 @@ public class RendererFactory {
 	    catch(Exception e) {e.printStackTrace();}
 	    return obj;
 	}
-
+	
 	@Override
 	public Renderer reactivate(final Renderer obj) {
-	    final ThreadManager tm = threadManager;
-	    try {getGlExecutor().submitToGL(new GLExecutable<Void, GL>(){
+	    //final ThreadManager tm = threadManager;
+	    try {getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
 		@Override
-		public Void execute(GL gl) throws Exception {
+		public Void execute(GL3 gl) throws Exception {
 		    obj.setEnabled(true);
 		    return null;
 		}}).get();}
@@ -721,6 +720,8 @@ public class RendererFactory {
     }
     
     public static class PortalNotAvailableException extends IllegalStateException {
+	private static final long serialVersionUID = -5040218215846640310L;
+
 	public PortalNotAvailableException(){
 	    super();
 	}
@@ -738,7 +739,7 @@ public class RendererFactory {
         this.reporter = reporter;
     }
 
-    public GLExecutor getGlExecutor() {
+    public GLExecutor<GL3> getGlExecutor() {
         return glExecutor;
     }
 }//end RendererFactory

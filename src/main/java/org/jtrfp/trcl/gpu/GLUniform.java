@@ -17,12 +17,12 @@ import java.nio.IntBuffer;
 import com.jogamp.opengl.GL3;
 
 public class GLUniform {
-    private final GLProgram prg;
+    //private final GLProgram prg;
     private final int uniformID;
     private static GL3 gl;
 
     GLUniform(GLProgram prg, int uniformID) {
-	this.prg = prg;
+	//this.prg = prg;
 	this.uniformID = uniformID;
 	gl = prg.getGl();
     }

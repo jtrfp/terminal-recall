@@ -34,14 +34,16 @@ import org.mockito.Mockito;
 
 public class ObjectTallyCollectionTest {
     protected static final int DELEGATE_SIZE = 5;
+    @SuppressWarnings("unchecked")
     protected static final Iterator<Object> DELEGATE_ITERATOR = IteratorUtils.EMPTY_ITERATOR;
     protected static final Object [] DELEGATE_BACKING_ARRAY = new Object[]{1,2,3,4,5};//Dat casting magic, yo.
     private ObjectTallyCollection<Object> subject;
     private Collection<Object> delegate;
 
+    @SuppressWarnings("unchecked")
     @Before
     public void setUp() throws Exception {
-	delegate = (Collection<Object>)Mockito.mock(Collection.class);
+	delegate = Mockito.mock(Collection.class);
 	
 	when(delegate.size()).thenReturn    (DELEGATE_SIZE);
 	when(delegate.iterator()).thenReturn(DELEGATE_ITERATOR);

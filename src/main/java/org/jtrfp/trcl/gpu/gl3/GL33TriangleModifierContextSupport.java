@@ -179,7 +179,7 @@ public class GL33TriangleModifierContextSupport {
     
     protected void updateTextureRange(final int start, final int end){
 	final TriangleVertexWindow vw = getTriangleVertexWindow();
-	final double scalar = 1; //TODO
+	//final double scalar = 1; //TODO
 	int bufferIndex = start * STRIDE;
 	final ArrayList<VQTexture> textureIDs=getTextureIDs();
 	final ArrayDoubleList xyzuvNxNyNz    = getXyzuvNxNyNz();

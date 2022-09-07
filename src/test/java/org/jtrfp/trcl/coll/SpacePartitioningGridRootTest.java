@@ -156,9 +156,11 @@ public class SpacePartitioningGridRootTest {
 	subject.add(mockedPositionables[2]);
 	subject.removeAll();
 	singleThreadExecutorBarrier(World.relevanceExecutor);
+	@SuppressWarnings("rawtypes")
 	ArgumentCaptor<Pair> argument 
 	 = ArgumentCaptor.forClass(Pair.class);
 	verify(mockedTarget,times(1)).remove(argument.capture());
+	@SuppressWarnings("unchecked")
 	Pair<Vector3D,CollectionActionDispatcher<Positionable>> pair = argument.getValue();
 	 assertNotNull(pair);
 	 assertEquals(new CubeCoordinate(0,0,0),pair.getFirst());

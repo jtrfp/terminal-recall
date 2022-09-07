@@ -36,6 +36,7 @@ public class PredicatedORCollectionActionFilterDelegateTest extends
 	subject.add(new PrimaryColorPredicate());
     }
     
+    @SuppressWarnings("unchecked")
     private void populateTruePredicate(){
 	subject.add(TruePredicate.INSTANCE);
     }

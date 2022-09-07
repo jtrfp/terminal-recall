@@ -125,7 +125,7 @@ public class CompoundListenableCollectionTest extends TestCase {
 	assertFalse(compoundListenableCollection.contains(Integer.valueOf(5)));
 	listenableCollections.iterator().next().add(5);
 	assertTrue(compoundListenableCollection.contains(Integer.valueOf(5)));
-	Integer integer = new Integer(totalVals*3);
+	Integer integer = Integer.valueOf(totalVals*3);
 	ListenableCollection<Integer> newColl = new DefaultListenableCollection<Integer>(new ArrayList<Integer>());
 	listenableCollections.add(newColl);
 	assertFalse(compoundListenableCollection.contains(integer));
@@ -134,7 +134,7 @@ public class CompoundListenableCollectionTest extends TestCase {
     }//end testContains()
 
     public void testAddAll() {
-	try{compoundListenableCollection.add(new Integer(12345));}
+	try{compoundListenableCollection.add(Integer.valueOf(12345));}
 	catch(UnsupportedOperationException e)
 	 {return;}
 	fail("Exception failed to throw.");

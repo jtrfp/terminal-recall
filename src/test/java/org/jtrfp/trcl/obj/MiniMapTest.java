@@ -13,8 +13,6 @@
 
 package org.jtrfp.trcl.obj;
 
-import java.awt.Dimension;
-
 import org.jtrfp.trcl.core.Features;
 import org.jtrfp.trcl.gpu.SettableTexture;
 import org.junit.After;

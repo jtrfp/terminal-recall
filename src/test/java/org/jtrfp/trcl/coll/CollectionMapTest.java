@@ -21,7 +21,7 @@ public class CollectionMapTest {
 
     @Test
     public void testCollectionMap() {
-	new CollectionMap();
+	new CollectionMap<>();
     }
 
     @Test

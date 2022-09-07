@@ -29,7 +29,6 @@ import org.apache.commons.collections4.collection.PredicatedCollection;
 import org.apache.commons.collections4.functors.InstanceofPredicate;
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.Camera;
-import org.jtrfp.trcl.GridCubeProximitySorter;
 import org.jtrfp.trcl.MatrixWindow;
 import org.jtrfp.trcl.ObjectListWindow;
 import org.jtrfp.trcl.SpacePartitioningGrid;
@@ -44,7 +43,6 @@ import org.jtrfp.trcl.coll.ListActionTelemetry;
 import org.jtrfp.trcl.coll.PartitionedList;
 import org.jtrfp.trcl.coll.RedundancyReportingCollection;
 import org.jtrfp.trcl.core.NotReadyException;
-import org.jtrfp.trcl.core.TRFutureTask;
 import org.jtrfp.trcl.core.ThreadManager;
 import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
@@ -66,17 +64,17 @@ import com.ochafik.util.listenable.AdaptedCollection;
 public final class Renderer {
     private       	RendererFactory		rendererFactory;
     //private 		RenderableSpacePartitioningGrid rootGrid;
-    private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
+    //private final	GridCubeProximitySorter proximitySorter = new GridCubeProximitySorter();
     private		GLFrameBuffer		renderingTarget;
     private 		boolean 		initialized = false;
     private     	GPU 			gpu;
     //public      	TRFutureTask<RenderList> renderList;
     private 		int			frameNumber;
     private 		long			lastTimeMillis;
-    private		double			meanFPS;
+    //private		double			meanFPS;
                         float[]			cameraMatrixAsFlatArray	   = new float[16];
                         float	[]		camRotationProjectionMatrix= new float[16];
-    private		TRFutureTask<Void>	relevanceUpdateFuture,relevanceCalcTask;
+    //private		TRFutureTask<Void>	relevanceUpdateFuture,relevanceCalcTask;
     private 		SkyCube			skyCube;
     final 		AtomicLong		nextRelevanceCalcTime = new AtomicLong(0L);
     //private final	CollisionManager        collisionManager;
@@ -113,10 +111,10 @@ public final class Renderer {
     private final	PartitionedList<VEC4Address>
     						renderListPoolNEW = new PartitionedList<>(objectListTelemetry);
     private final	CollectionAdapter<CollectionActionDispatcher<VEC4Address>,PositionedRenderable>
-    	opaqueODAddrsColl    	   = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(opaqueIL                 = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),opaqueODAdapter),
-    	opaqueUnoccludedODAddrsColl= new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(opaqueUnoccludedIL = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),opaqueUnoccludedODAddrAdapter),
-    	transODAddrsColl     	   = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transIL          = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transODAdapter ), 
-        transUnoccludedODAddrsColl = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler(transUnoccludedIL  = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transUnoccludedODAddrAdapter);
+    	opaqueODAddrsColl    	   = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler<>(opaqueIL                 = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),opaqueODAdapter),
+    	opaqueUnoccludedODAddrsColl= new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler<>(opaqueUnoccludedIL = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),opaqueUnoccludedODAddrAdapter),
+    	transODAddrsColl     	   = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler<>(transIL          = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transODAdapter ), 
+        transUnoccludedODAddrsColl = new CollectionAdapter<>(new CollectionActionUnpacker<VEC4Address>(new CollectionThreadDecoupler<>(transUnoccludedIL  = new IndexList<>(renderListPoolNEW.newSubList()),RENDER_LIST_EXECUTOR)),transUnoccludedODAddrAdapter);
 
     
     private             MatrixWindow            matrixWindowContext;
@@ -188,6 +186,7 @@ public final class Renderer {
 	relevantPositionedRenderables.addTarget(transUnoccludedODAddrsColl, true);
 	relevantPositionedRenderables.addTarget(new RedundancyReportingCollection<PositionedRenderable>(), true);
 
+	@SuppressWarnings("unchecked")
 	final Future<Void> task0 = gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
 	    @Override
 	    public Void execute(GL3 gl) throws Exception {
@@ -228,7 +227,7 @@ public final class Renderer {
 	    final Collection<PositionedRenderable> coll = getVisibleWorldObjectList();
 	    synchronized(coll){
 	    reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" numVisibleObjects", coll.size()+"");
-	    SpacePartitioningGrid spg = getCamera().getRootGrid();
+	    SpacePartitioningGrid<PositionedRenderable> spg = getCamera().getRootGrid();
 	    if(spg!=null)
 	     reporter.report("org.jtrfp.trcl.core.Renderer."+debugName+" rootGrid", spg.toString());
 	    }
@@ -356,8 +355,7 @@ public final class Renderer {
         return this;
     }
     
-    private final Object relevanceUpdateLock = new Object();
-    
+    //private final Object relevanceUpdateLock = new Object();
 
     public RendererFactory getRendererFactory() {
 	return rendererFactory;

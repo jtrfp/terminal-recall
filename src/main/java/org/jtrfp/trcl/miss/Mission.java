@@ -46,7 +46,6 @@ import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.lvl.LVLFileEnhancementsFactory.LVLFileEnhancements;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
-import org.jtrfp.trcl.file.AbstractTriplet;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
 import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
@@ -54,8 +53,6 @@ import org.jtrfp.trcl.file.NAVFile.START;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
-import org.jtrfp.trcl.gpu.GLAutoDrawableProvider;
-import org.jtrfp.trcl.gpu.GLExecutor;
 import org.jtrfp.trcl.gpu.Renderer;
 import org.jtrfp.trcl.gui.ReporterFactory.Reporter;
 import org.jtrfp.trcl.miss.LoadingProgressReporter.UpdateHandler;
@@ -135,8 +132,8 @@ public class Mission {
     private LVLFile 	        lvl;
     private double[] 		playerStartPosition;
     private List<NAVSubObject> 	navSubObjects;
-    private double []           playerStartHeading,
-                                playerStartTop;
+    //private double []           playerStartHeading,
+    //                            playerStartTop;
     private Game 		game;
     private String       	levelName;
     private OverworldSystem 	overworldSystem;
@@ -147,7 +144,7 @@ public class Mission {
     private boolean	        showIntro = true;
     private volatile MusicPlaybackEvent
     				bgMusic;
-    private final Object	missionLock = new Object();
+    //private final Object	missionLock = new Object();
     private boolean 		satelliteView = false;
     private WorldObject         currentBoss = null;
     //private MissionMode		missionMode = new Mission.LoadingMode();
@@ -158,13 +155,14 @@ public class Mission {
     private final RenderableSpacePartitioningGrid partitioningGrid = new RenderableSpacePartitioningGrid();
     private GameShell gameShell;
     private final RunStateListener runStateListener = new RunStateListener();
+    @SuppressWarnings("unused")
     private WeakPropertyChangeListener weakRunStateListener; // HARD REFERENCE; DO NOT REMOVE.
     private String lvlFileName;
     private List<DEFObject> defObjectList;
     private Map<NAVObjective,NAVSubObject> navMap = new HashMap<>();
     private PlayerSaveState playerSaveState;
-    private GLExecutor<?> glExecutor;
-    private Vector3D sunVector;
+    //private GLExecutor<?> glExecutor;
+    //private Vector3D sunVector;
 
     enum LoadingStages {
 	navs, tunnels, overworld
@@ -375,7 +373,7 @@ public class Mission {
 	    };
 	    
 	  //New LVL override stuff
-	    boolean enhanced = false;
+	    //boolean enhanced = false;
 	    LVLFileEnhancements enhancements = Features.get(tr, LVLFileEnhancements.class);
 	    
 	    overworldSystem.loadLevel(lvlData, tdf, enhancements!=null?enhancements.findByHook(levelName):null);
@@ -481,10 +479,10 @@ public class Mission {
 	    }// end if(user start point)
 	    System.out.println("Start position set to " + player.getPosition()[0]+" "+player.getPosition()[1]+" "+player.getPosition()[2]);
 	    System.out.println("Setting sun vector");
-	    final AbstractTriplet sunVectorTriplet = lvlData.getSunlightDirectionVector();
-	    sunVector = new Vector3D(sunVectorTriplet.getX(), sunVectorTriplet.getY(),
-		    sunVectorTriplet.getZ()).normalize();
-	    final GLExecutor<?> glExecutor = getGlExecutor();
+	    //final AbstractTriplet sunVectorTriplet = lvlData.getSunlightDirectionVector();
+	    /*sunVector = new Vector3D(sunVectorTriplet.getX(), sunVectorTriplet.getY(),
+		    sunVectorTriplet.getZ()).normalize();*/
+	    //final GLExecutor<?> glExecutor = getGlExecutor();
 	    
 	    System.out.println("\t...Done.");
 	} catch (Exception e) {
@@ -522,13 +520,13 @@ public class Mission {
 	}//end sync
 	*/
     }// end go()
-    
+    /*
     private GLExecutor<?> getGlExecutor() {
 	if( glExecutor == null )
 	    glExecutor = Features.get(Features.get(getTr(), GLAutoDrawableProvider.class),GLExecutor.class);
 	return glExecutor;
     }
-
+*/
     private LVLFile getLvl() {
 	if(lvl == null)
 	    try{lvl = getTr().getResourceManager().getLVL(getLvlFileName());}

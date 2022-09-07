@@ -278,8 +278,8 @@ public class EntryBasedIndexPool<CONTAINED_TYPE> implements PropertyChangeListen
 	    pcs.removePropertyChangeListener(propertyName, listener);
 	}
 	
-	public class DeadEntry extends Entry{
-	    protected DeadEntry(EntryBasedIndexPool parent) {
+	public class DeadEntry extends Entry<CONTAINED_TYPE>{
+	    protected DeadEntry(EntryBasedIndexPool<CONTAINED_TYPE> parent) {
 		super(parent, null);
 	    }//end constructor
 	    @Override

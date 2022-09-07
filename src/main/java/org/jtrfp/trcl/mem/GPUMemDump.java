@@ -35,10 +35,10 @@ import com.jogamp.opengl.GL3;
 
 public class GPUMemDump {
 private final GPU gpu;
-private final TR tr;
+//private final TR tr;
     public GPUMemDump(TR tr) {
 	//Dump raw memory
-	this.tr=tr;
+	//this.tr=tr;
 	gpu = Features.get(tr, GPUFeature.class);
 	try{
 	System.out.println("Dumping root memory...");

@@ -201,7 +201,8 @@ public final class Vect3D {
 	return l[0]*r[0]+l[1]*r[1]+l[2]*r[2];
     }
     
-    public static class ZeroNormException extends RuntimeException{}
+    public static class ZeroNormException extends RuntimeException{
+	private static final long serialVersionUID = 1013428591936142264L;}
 
     public static double [] abs(double[] input, double [] output) {
 	final int len = input.length;

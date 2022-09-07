@@ -14,7 +14,6 @@ package org.jtrfp.trcl.gpu;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 import org.apache.commons.collections.primitives.DoubleList;
@@ -29,7 +28,6 @@ import org.jtrfp.trcl.TransparentTriangleList;
 import org.jtrfp.trcl.Triangle;
 import org.jtrfp.trcl.TriangleList;
 import org.jtrfp.trcl.core.TRFactory.TR;
-import org.jtrfp.trcl.core.TRFuture;
 
 public class GL33Model implements Model {
     // [FRAME][LIST]
@@ -49,7 +47,7 @@ public class GL33Model implements Model {
     private static final long ANIMATION_UPDATE_INTERVAL = 10;
     private final ArrayList<Tickable> tickableAnimators = new ArrayList<Tickable>();
     private volatile boolean animated=false;
-    private boolean modelFinalized = false;
+    //private boolean modelFinalized = false;
     private GL33Model finalizedModel;
     //Keeps hard references to Textures to keep them from getting gobbled.
     private final HashSet<Texture> textures = new HashSet<Texture>();
@@ -139,10 +137,11 @@ public class GL33Model implements Model {
 	//return finalizedModel = tr.getThreadManager().submitToThreadPool(new Callable<GL33Model>(){
 	    //@Override
 	    //public GL33Model call() throws Exception {
+		@SuppressWarnings("unused")
 		Future<Void> tpFuture=null, ttpFuture=null;
 		//if(modelFinalized)
 		//    return GL33Model.this;
-		modelFinalized = true;
+		//modelFinalized = true;
 		if(animated)//Discard frame zero
 		    {tLists.remove(0);ttLists.remove(0);}
 		Controller c = controller;
@@ -448,7 +447,7 @@ public class GL33Model implements Model {
 
     @Override
     public ModelModifierContext getModifierContext(
-	    Class<? extends ModelModifierContext>... classRequirements) {
+	    @SuppressWarnings("unchecked") Class<? extends ModelModifierContext>... classRequirements) {
 	throw new UnsupportedOperationException();//TODO
     }
 

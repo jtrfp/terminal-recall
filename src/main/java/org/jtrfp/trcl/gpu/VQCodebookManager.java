@@ -105,8 +105,8 @@ public class VQCodebookManager {
 	return this;
     }
 
-    private static final int [] codeDims 	= new int[] { CODE_SIDE_LENGTH, CODE_SIDE_LENGTH, 1 };
-    private static final int [] codePageDims 	= new int[] { CODE_PAGE_SIDE_LENGTH_TEXELS, CODE_PAGE_SIDE_LENGTH_TEXELS, 1 };
+    //private static final int [] codeDims 	= new int[] { CODE_SIDE_LENGTH, CODE_SIDE_LENGTH, 1 };
+    //private static final int [] codePageDims 	= new int[] { CODE_PAGE_SIDE_LENGTH_TEXELS, CODE_PAGE_SIDE_LENGTH_TEXELS, 1 };
     private static final int [] code256Dims	= new int[] {CODE_PAGE_SIDE_LENGTH_TEXELS,CODE256_HEIGHT_CODES*CODE_SIDE_LENGTH, 1};
 
     public static interface RasterRowWriter{

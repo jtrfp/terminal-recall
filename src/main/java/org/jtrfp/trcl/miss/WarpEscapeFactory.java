@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 public class WarpEscapeFactory implements FeatureFactory<Mission> {
     private final DisablePlayerControlSubmitter disablePlayerControlSubmitter = new DisablePlayerControlSubmitter();
     private final EnablePlayerControlSubmitter  enablePlayerControlSubmitter = new EnablePlayerControlSubmitter();
-    private TR tr;
+    //private TR tr;
     private GameShell gameShell;
     
     private class DisablePlayerControlSubmitter extends AbstractSubmitter<PlayerControlBehavior>{

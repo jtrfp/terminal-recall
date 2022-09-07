@@ -44,7 +44,7 @@ public final class MemoryManager {
                                                 deletedPagedByteBuffers = new ArrayList<WeakReference<PagedByteBuffer>>(1024);
     private final ArrayList<WeakReference<PagedByteBuffer>>	
     						pagedByteBuffers = new ArrayList<WeakReference<PagedByteBuffer>>(1024);
-    private final GLExecutor                    glExecutor;
+    private final GLExecutor<GL3>               glExecutor;
     /**
      * 16MB of zeroes. Don't forget to sync to avoid co-modification of the position.
      */

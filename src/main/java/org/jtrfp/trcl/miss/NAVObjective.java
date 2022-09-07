@@ -12,7 +12,6 @@
  ******************************************************************************/
 package org.jtrfp.trcl.miss;
 
-import java.awt.Point;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
@@ -113,10 +112,11 @@ public abstract class NAVObjective {
 		    TUN tun = (TUN)navSubObject;
 		    //Entrance and exit locations are already set up.
 		    final Location3D 	loc3d 	= tun.getLocationOnMap();
-		    final Vector3D modernLoc = new Vector3D(
+		    /*final Vector3D modernLoc = new Vector3D(
 				    TRFactory.legacy2Modern(loc3d.getX()),
 				    TRFactory.legacy2Modern(loc3d.getY()),
 				    TRFactory.legacy2Modern(loc3d.getZ()));
+		    */
 		    /*final TunnelEntranceObject teo = ((TVF3Game)tr.getGameShell().getGame()).getCurrentMission().getTunnelEntranceObject(
 			    new Point((int)(modernLoc.getX()/TRFactory.mapSquareSize),(int)(modernLoc.getZ()/TRFactory.mapSquareSize)));
 		    */
@@ -172,7 +172,7 @@ public abstract class NAVObjective {
 				return tunnelExit;
 			    }
 		    };//end new NAVObjective tunnelExit
-		    final Point tunnelPoint = new Point((int)TRFactory.legacy2MapSquare(loc3d.getZ()),(int)TRFactory.legacy2MapSquare(loc3d.getX()));
+		    //final Point tunnelPoint = new Point((int)TRFactory.legacy2MapSquare(loc3d.getZ()),(int)TRFactory.legacy2MapSquare(loc3d.getX()));
 		    /*
 		    //if(mission.getTunnelEntrancePortal(new Point((int)TRFactory.legacy2MapSquare(loc3d.getZ()),(int)TRFactory.legacy2MapSquare(loc3d.getX())))==null){
 			//TODO

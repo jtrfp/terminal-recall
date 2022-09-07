@@ -19,17 +19,11 @@ import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
 
 import org.jtrfp.trcl.LineSegment;
 import org.jtrfp.trcl.core.ThreadManager;
-import org.jtrfp.trcl.gui.GLExecutable;
-
-import com.jogamp.opengl.GL3;
-
-import lombok.Getter;
 
 
 /**

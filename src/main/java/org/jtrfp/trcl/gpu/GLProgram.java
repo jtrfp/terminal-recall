@@ -21,13 +21,13 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GL4;
 
 public class GLProgram {
-    private 		GPU 	gpu;
+    //private 		GPU 	gpu;
     private final 	GL3 	gl;
     private final 	int 	programID;
     private ValidationHandler 	validationHandler = defaultValidationHandler;
 
     GLProgram(GPU gpu) {
-	this.gpu 	= gpu;
+	//this.gpu 	= gpu;
 	this.gl 	= gpu.getGl();
 	programID 	= gl.glCreateProgram();
 	if (programID < 0)

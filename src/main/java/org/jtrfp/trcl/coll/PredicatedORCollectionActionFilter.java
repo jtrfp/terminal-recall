@@ -24,7 +24,6 @@ import java.util.Set;
 import org.apache.commons.collections.iterators.UnmodifiableIterator;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.collections4.iterators.IteratorChain;
-import org.jtrfp.trcl.World;
 import org.jtrfp.trcl.tools.Util;
 
 public class PredicatedORCollectionActionFilter<E> implements Collection<Predicate<E>> {
@@ -104,17 +103,19 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	return predicates.isEmpty();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Iterator<Predicate<E>> iterator() {
-	final ArrayList<Predicate> pCopy = new ArrayList<Predicate>(predicates);
+	final ArrayList<Predicate<E>> pCopy = new ArrayList<>(predicates);
 	return UnmodifiableIterator.decorate(pCopy.iterator());
     }
 
     @Override
-    public boolean remove(Object element) {//TODO: BUG - this is single instance
+    public boolean remove(Object element) {//FIXME: BUG - this is single instance
 	return removeAll(Arrays.asList(element));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean removeAll(Collection<?> _toRemove) {
 	final ArrayList<Predicate<E>> toRemove = new ArrayList<Predicate<E>>(_toRemove.size());
@@ -225,9 +226,10 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	    return used.isEmpty() && unused.isEmpty();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Iterator<E> iterator() {
-	    return UnmodifiableIterator.decorate(new IteratorChain(Arrays.asList(used.iterator(),unused.iterator())));
+	    return UnmodifiableIterator.decorate(new IteratorChain<E>(Arrays.asList(used.iterator(),unused.iterator())));
 	}
 
 	@Override
@@ -284,6 +286,7 @@ public class PredicatedORCollectionActionFilter<E> implements Collection<Predica
 	    return result;
 	}//end toArray()
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T[] toArray(T[] a) {
 	    final int size = size();

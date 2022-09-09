@@ -14,12 +14,9 @@
 package org.jtrfp.trcl.coll;
 
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
-import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.jtrfp.trcl.obj.Positionable;
 import org.jtrfp.trcl.tools.Util;
 
 import com.ochafik.util.Adapter;
-import com.ochafik.util.listenable.Pair;
 
 public abstract class CachedAdapter<U,V> implements Adapter<U, V> {
     private final BidiReferenceMap<U,V> cache;

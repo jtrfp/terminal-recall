@@ -133,6 +133,7 @@ public class CompoundListenableCollectionTest extends TestCase {
 	assertTrue(compoundListenableCollection.contains(integer));
     }//end testContains()
 
+    @SuppressWarnings("deprecation")
     public void testAddAll() {
 	try{compoundListenableCollection.add(Integer.valueOf(12345));}
 	catch(UnsupportedOperationException e)

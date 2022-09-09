@@ -25,7 +25,8 @@ import org.apache.commons.collections4.map.ReferenceMap;
  * @param <V>
  */
 public class BidiReferenceMap<K, V> extends DualHashBidiMap<K,V> {
-    
+    private static final long serialVersionUID = 3865398484501725063L;
+
     public BidiReferenceMap(AbstractReferenceMap.ReferenceStrength keyType, AbstractReferenceMap.ReferenceStrength valueType, int capacity, float loadFactor, boolean purgeValues){
 	super(new ReferenceMap<K,V>(keyType,valueType,capacity,loadFactor,purgeValues), 
 		new ReferenceMap<V,K>(keyType,valueType,capacity,loadFactor,purgeValues),null);

@@ -141,6 +141,7 @@ public class ListActionAdapter<IN,OUT> implements List<IN> {
 	return result;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean removeAll(Collection<?> c) {
 	Collection<Object> toRemove = new ArrayList<Object>(c.size());

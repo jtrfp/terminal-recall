@@ -13,7 +13,6 @@
 
 package org.jtrfp.trcl.coll;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -45,6 +44,7 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
 
     @Override
     public synchronized boolean addAll(final Collection<? extends E> elements) {
+	@SuppressWarnings("unchecked")
 	final List<E> toAdd = (List<E>)Arrays.asList(elements.toArray());
 	executor.execute(new Runnable(){
 	    @Override
@@ -139,6 +139,7 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
 
     @Override
     public synchronized void repopulate(final Collection<E> c) {
+	@SuppressWarnings("unchecked")
 	final List<E> toRepopulate = (List<E>)Arrays.asList(c.toArray());
 	executor.execute(new Runnable(){
 	    @Override
@@ -153,6 +154,7 @@ public class CollectionThreadDecoupler<E> implements Collection<E>, Repopulatabl
 
     @Override
     public synchronized void bulkRemove(final Collection<E> it) {
+	@SuppressWarnings("unchecked")
 	final Collection<E> items = (Collection<E>)Arrays.asList(it.toArray());
 	executor.execute(new Runnable(){
 	    @Override

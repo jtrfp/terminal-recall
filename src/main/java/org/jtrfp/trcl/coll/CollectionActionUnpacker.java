@@ -78,6 +78,7 @@ public class CollectionActionUnpacker<E> implements Collection<CollectionActionD
     public boolean remove(Object o) {
 	boolean result = false;
 	if(o instanceof CollectionActionDispatcher){
+	    @SuppressWarnings("unchecked")
 	    CollectionActionDispatcher<E> coll = (CollectionActionDispatcher<E>)o;
 	    result |= collections.remove(coll);
 	    

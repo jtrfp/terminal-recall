@@ -66,6 +66,7 @@ public class ConsolidatingCollectionActionPacker<E,KEY> implements Collection<Pa
     public boolean contains(Object o) {
 	if(! (o instanceof Pair))
 	    return false;
+	@SuppressWarnings("unchecked")
 	final Pair<KEY,CollectionActionDispatcher<E>> pair = (Pair<KEY,CollectionActionDispatcher<E>>)o;
 	return map.containsKey(pair.getKey());
 	//return cache.contains(o);
@@ -96,6 +97,7 @@ public class ConsolidatingCollectionActionPacker<E,KEY> implements Collection<Pa
 	    return false;
 	//if(!cache.remove(o))
 	//    return false;
+	@SuppressWarnings("unchecked")
 	Pair<KEY,CollectionActionDispatcher<E>> element = (Pair<KEY,CollectionActionDispatcher<E>>)o;
 	final KEY key = element.getKey();
 	final Pair<KEY,CollectionActionDispatcher<E>> target = map.get(key);

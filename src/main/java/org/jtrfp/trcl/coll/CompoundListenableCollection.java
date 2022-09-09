@@ -68,6 +68,7 @@ public class CompoundListenableCollection<T> implements ListenableCollection<T> 
 		    }//end EventTypes
 		}};
     
+    @SuppressWarnings("unchecked")
     public CompoundListenableCollection(ListenableCollection<ListenableCollection<T>> adapted){
 	final Object wildcardObject = adapted;//Just don't look at it and it won't hurt as much.
 	delegate = new CompoundCollection<T>((Collection<Collection<? extends T>>)wildcardObject);
@@ -201,6 +202,7 @@ public class CompoundListenableCollection<T> implements ListenableCollection<T> 
      * @return
      * @see com.ochafik.util.CompoundCollection#toArray(T[])
      */
+    @SuppressWarnings("hiding")
     public <T> T[] toArray(T[] objects) {
 	return delegate.toArray(objects);
     }

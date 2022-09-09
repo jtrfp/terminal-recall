@@ -28,7 +28,7 @@ public class RedundancyReportingCollection<E> implements Collection<E> {
 
     protected Submitter<E> getRedundancyHandler() {
 	if(redundancyHandler == null)
-	    setRedundancyHandler(new PrintingRedundancyHandler<E>());
+	    setRedundancyHandler(new PrintingRedundancyHandler());
         return redundancyHandler;
     }
 
@@ -40,7 +40,7 @@ public class RedundancyReportingCollection<E> implements Collection<E> {
 	getRedundancyHandler().submit(item);
     }
     
-    class PrintingRedundancyHandler<E> extends AbstractSubmitter<E>{
+    class PrintingRedundancyHandler extends AbstractSubmitter<E>{
 	@Override
 	public void submit(E item) {
 	    new RuntimeException("Redundancy found: "+item).printStackTrace();

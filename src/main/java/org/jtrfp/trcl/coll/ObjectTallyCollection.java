@@ -118,6 +118,7 @@ public final class ObjectTallyCollection<T> implements Collection<T>, Decorator<
 	return delegate.iterator();
     }
 
+    @SuppressWarnings("unchecked")
     public boolean remove(Object o) {
 	decrement((T)o);//TODO: Risky business here.
 	return delegate.remove(o);
@@ -141,6 +142,7 @@ public final class ObjectTallyCollection<T> implements Collection<T>, Decorator<
 	return delegate.toArray();
     }
 
+    @SuppressWarnings("hiding")
     public <T> T[] toArray(T[] a) {
 	return delegate.toArray(a);
     }
@@ -159,6 +161,8 @@ public final class ObjectTallyCollection<T> implements Collection<T>, Decorator<
     }
     
     public static final class NegativeTallyException extends IllegalStateException{
+	private static final long serialVersionUID = -8425904283777145678L;
+
 	public NegativeTallyException(){super();}
 
 	public NegativeTallyException(Object e) {

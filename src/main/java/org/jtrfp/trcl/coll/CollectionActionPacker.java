@@ -80,6 +80,7 @@ public class CollectionActionPacker<E,KEY> implements Collection<Pair<KEY,E>>, D
 	    return false;
 	if(!cache.remove(o))
 	    return false;
+	@SuppressWarnings("unchecked")
 	Pair<KEY,E> element = (Pair<KEY,E>)o;
 	final KEY key = element.getKey();
 	final Pair<KEY,CollectionActionDispatcher<E>> target = map.get(key);

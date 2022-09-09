@@ -42,6 +42,7 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
 	this.executor       =executor;
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public boolean add(final E e) {
 	Pair<KEY,E>pair= pairs.get(e);
@@ -177,6 +178,7 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
 	    @Override
 	    public void propertyChange(final PropertyChangeEvent evt) {
 		final Runnable r = new Runnable(){
+		    @SuppressWarnings("unchecked")
 		    @Override
 		    public void run() {
 			final Object source = evt.getSource();
@@ -207,6 +209,7 @@ public class PropertyBasedTagger<E extends PropertyListenable,KEY,PROPERTY_TYPE>
 	    }};
 	    
 	    public static class ElementNotFoundException extends IllegalArgumentException {
+		private static final long serialVersionUID = 1809473453890441952L;
 		public ElementNotFoundException(){super();}
 		public ElementNotFoundException(String msg){super(msg);};
 	    }

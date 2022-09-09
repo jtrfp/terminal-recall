@@ -109,6 +109,7 @@ public class ListActionUnpacker<E> implements List<Collection<E>> {
     public boolean remove(Object o) {
 	boolean result = false;
 	if(o instanceof Collection){
+	    @SuppressWarnings("unchecked")
 	    Collection<E> coll = (Collection<E>)o;
 	    result |= delegate.removeAll(coll);
 	}
@@ -139,7 +140,7 @@ public class ListActionUnpacker<E> implements List<Collection<E>> {
 	boolean result = false;
 	for(Object e0:c)
 	    if(e0 instanceof Collection)
-		result |= delegate.retainAll((Collection)e0);
+		result |= delegate.retainAll((Collection<?>)e0);
 	return result;
     }
     @Override

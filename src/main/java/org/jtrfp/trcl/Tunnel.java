@@ -37,7 +37,6 @@ import org.jtrfp.trcl.core.ResourceManager;
 import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.ext.lvl.LVLFileEnhancementsFactory.LVLFileEnhancements;
-import org.jtrfp.trcl.ext.tr.GPUFactory.GPUFeature;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.file.TDFFile.ExitMode;
@@ -62,8 +61,6 @@ import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.prop.HorizGradientCubeGen;
 import org.jtrfp.trcl.prop.SkyCubeGen;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
-
-import com.jogamp.opengl.GL3;
 
 import lombok.Getter;
 

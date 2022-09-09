@@ -109,8 +109,7 @@ public class TRIT {
 		    final TR tr = Features.get(features, TR.class);
 		    final RootWindow rootWindow = Features.get(tr, RootWindow.class);
 		    final Renderer renderer = tr.mainRenderer;
-
-		    @SuppressWarnings("unchecked")
+		    
 		    final Future<BufferedImage> screenshotTask = renderer.getGpu().getGlExecutor().submitToGL(new GLExecutable<BufferedImage, GL3>(){
 			@Override
 			public BufferedImage execute(GL3 gl) {

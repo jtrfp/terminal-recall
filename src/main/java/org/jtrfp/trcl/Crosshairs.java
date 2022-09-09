@@ -18,7 +18,6 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
-import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.jtrfp.trcl.beh.MatchDirection;
 import org.jtrfp.trcl.beh.MatchPosition;
 import org.jtrfp.trcl.conf.TRConfigurationFactory;
@@ -45,7 +44,9 @@ import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
 
 public class Crosshairs extends WorldObject implements RelevantEverywhere {
     private GameShell gameShell;
+    @SuppressWarnings("unused")
     private PropertyChangeListener     crosshairsEnabledListener, gamePCL, controlPCL;
+    @SuppressWarnings("unused")
     private WeakPropertyChangeListener weakCrosshairsEnabledListener, weakGamePCL, weakControlPCL;
     private ControllerSink toggleCrosshairsControllerInput;
     private TRConfiguration trConfiguration;

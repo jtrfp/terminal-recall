@@ -393,6 +393,7 @@ public class IndexShiftingList<E> implements List<E> {
      * @return
      * @see java.util.List#toArray(T[])
      */
+    @SuppressWarnings("unchecked")
     public <T> T[] toArray(T[] a) {
 	if(a==null)
 	    throw new NullPointerException("Supplied array intolerably null.");

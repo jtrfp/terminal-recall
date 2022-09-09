@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.commons.collections.IteratorUtils;
-import org.apache.commons.collections.primitives.adapters.IteratorShortIterator;
 
 /**
  * A  List delegate which tracks modifications for more efficient deferred updates based on
@@ -38,7 +37,7 @@ public class ListActionTelemetry<E> implements List<E> {
     private final List<E>      delegate, subList;
     private volatile boolean   modified = true;
     private final boolean      isSubList;
-    private final int          startIndex,endIndex;
+    private final int          startIndex;
     private final ListActionTelemetry<E> root;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     
@@ -54,7 +53,7 @@ public class ListActionTelemetry<E> implements List<E> {
 	this.delegate  = delegate;
 	this.isSubList = isSubList;
 	this.startIndex=startIndex;
-	this.endIndex  =endIndex;
+	//this.endIndex  =endIndex;
 	this.root = root!=null?root:this;
 	subList = isSubList?delegate.subList(startIndex, endIndex):delegate;
     }
@@ -166,6 +165,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.AbstractList#equals(java.lang.Object)
      */
+    @SuppressWarnings("rawtypes")
     public boolean equals(Object o) {
 	if(o instanceof ListActionTelemetry)
 	    o=((ListActionTelemetry) o).getDelegate();
@@ -210,6 +210,7 @@ public class ListActionTelemetry<E> implements List<E> {
      * @return
      * @see java.util.ArrayList#iterator()
      */
+    @SuppressWarnings("unchecked")
     public Iterator<E> iterator() {
 	return IteratorUtils.unmodifiableIterator(getDelegate().iterator());
     }

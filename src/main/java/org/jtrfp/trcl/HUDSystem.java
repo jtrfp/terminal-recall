@@ -27,12 +27,12 @@ import org.jtrfp.trcl.obj.MeterBar;
 
 public class HUDSystem extends RenderableSpacePartitioningGrid {
     private static final double Z = -1;
-    private static final double[] HEALTH_POS = new double[] { .13000 - 1,
+    /*private static final double[] HEALTH_POS = new double[] { .13000 - 1,
 	    1 - .205, 0 };
     private static final double[] THROTTLE_POS = new double[] { .18875 - 1,
-	    1 - .205, 0 };
+	    1 - .205, 0 };*/
     private static final double METER_WIDTH = .02;
-    private static final double METER_HEIGHT = .16;
+    //private static final double METER_HEIGHT = .16;
     private final CharLineDisplay objective;
     private final CharLineDisplay distance;
     private final CharLineDisplay weapon;
@@ -47,8 +47,8 @@ public class HUDSystem extends RenderableSpacePartitioningGrid {
     public HUDSystem(TR tr, GLFont font, DashboardLayout layout) throws IOException {
 	super();
 	// Dash Text
-	final double TOP_LINE_Y = .93;
-	final double BOTTOM_LINE_Y = .82;
+	//final double TOP_LINE_Y = .93;
+	//final double BOTTOM_LINE_Y = .82;
 	final double FONT_SIZE = .04;
 	Point2D.Double pos;
 	

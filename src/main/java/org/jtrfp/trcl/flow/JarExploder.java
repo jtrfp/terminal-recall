@@ -51,9 +51,8 @@ public class JarExploder {
     }
     
     public static void deployNativeFilesFromJar(File jar){
-	JarFile jf = null;
-	try{
-	    jf = new JarFile(jar);
+	//JarFile jf = null;
+	try(JarFile jf = new JarFile(jar)) {
 	    byte [] buffer = new byte[1024];
 	    int read=0;
 	    Enumeration<JarEntry> entries = jf.entries();
@@ -80,7 +79,6 @@ public class JarExploder {
 		}//end if(endsWith)
 	    }//end while(entries)
 	}catch(Exception e){e.printStackTrace();}
-	finally {if(jf != null) try {jf.close();} catch(Throwable t) {t.printStackTrace();}}
     }//end getNativeFilesFromJar(...)
 
     public static void main(String[] args) {

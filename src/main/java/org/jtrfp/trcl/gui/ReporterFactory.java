@@ -152,46 +152,45 @@ public class ReporterFactory implements FeatureFactory<TR>{
 	    SwingUtilities.invokeLater(new Runnable(){
 		@Override
 		public void run() {
-		    Scanner dotScanner = null;
-		    try {
-		    dotScanner = new Scanner(path);
-		    DefaultMutableTreeNode workNode = top;
-		    dotScanner.useDelimiter("\\.");
-		    while(dotScanner.hasNext()){
-			final String treeItem = dotScanner.next();
-			final Enumeration<TreeNode> en = workNode.children();
-			DefaultMutableTreeNode matchingNode=null;
-			while(en.hasMoreElements()){
-			    DefaultMutableTreeNode testNode = (DefaultMutableTreeNode)en.nextElement();
-			    if(((TreeEntry)testNode.getUserObject()).getLabel().contentEquals(treeItem)){
-				matchingNode=testNode;
-			    }//end if(label matches)
-			}//end while(children)
-			if(matchingNode!=null){
-			    workNode=matchingNode;
-			}else{
-			    final DefaultMutableTreeNode n =new DefaultMutableTreeNode(new TreeEntry(treeItem,null));
-			    workNode.add(n);
-			    final DefaultMutableTreeNode _workNode=workNode;
-			    SwingUtilities.invokeLater(new Runnable(){
-				@Override
-				public void run() {
-				    tree.expandPath(new TreePath(_workNode.getPath()));
-				    Reporter.this.notifyUpdate();
-				}
-			    });
-			    workNode=n;
-			}//end matchingNode==null
-		    }//end while(hasNext())
-		    //Should be at the leaf of the tree. Set the child.
-		    ((TreeEntry)workNode.getUserObject()).setStored(item);
-		    if(tree.getSelectionPath()!=null){
-			if(workNode == tree.getSelectionPath().getLastPathComponent()){
-			    lblvalueHere.setText(item.toString());
-			    refreshNodeDetails();
-			}//end if(selected)
-		    }//end if(path1=null)
-		    } finally {if(dotScanner != null) dotScanner.close();}
+		    //Scanner dotScanner = null;
+		    try (Scanner dotScanner = new Scanner(path)){
+			DefaultMutableTreeNode workNode = top;
+			dotScanner.useDelimiter("\\.");
+			while(dotScanner.hasNext()){
+			    final String treeItem = dotScanner.next();
+			    final Enumeration<TreeNode> en = workNode.children();
+			    DefaultMutableTreeNode matchingNode=null;
+			    while(en.hasMoreElements()){
+				DefaultMutableTreeNode testNode = (DefaultMutableTreeNode)en.nextElement();
+				if(((TreeEntry)testNode.getUserObject()).getLabel().contentEquals(treeItem)){
+				    matchingNode=testNode;
+				}//end if(label matches)
+			    }//end while(children)
+			    if(matchingNode!=null){
+				workNode=matchingNode;
+			    }else{
+				final DefaultMutableTreeNode n =new DefaultMutableTreeNode(new TreeEntry(treeItem,null));
+				workNode.add(n);
+				final DefaultMutableTreeNode _workNode=workNode;
+				SwingUtilities.invokeLater(new Runnable(){
+				    @Override
+				    public void run() {
+					tree.expandPath(new TreePath(_workNode.getPath()));
+					Reporter.this.notifyUpdate();
+				    }
+				});
+				workNode=n;
+			    }//end matchingNode==null
+			}//end while(hasNext())
+			//Should be at the leaf of the tree. Set the child.
+			((TreeEntry)workNode.getUserObject()).setStored(item);
+			if(tree.getSelectionPath()!=null){
+			    if(workNode == tree.getSelectionPath().getLastPathComponent()){
+				lblvalueHere.setText(item.toString());
+				refreshNodeDetails();
+			    }//end if(selected)
+			}//end if(path1=null)
+		    }
 		}});
 	    return this;
 	}//end report(...)

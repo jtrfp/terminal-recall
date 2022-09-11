@@ -18,6 +18,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.math3.exception.MathArithmeticException;
@@ -45,6 +46,9 @@ import org.jtrfp.trcl.math.Mat4x4;
 import org.jtrfp.trcl.math.Vect3D;
 import org.jtrfp.trcl.math.Vect3D.ZeroNormException;
 import org.jtrfp.trcl.mem.VEC4Address;
+import org.jtrfp.trcl.tools.Util;
+
+import lombok.AllArgsConstructor;
 
 public class WorldObject implements PositionedRenderable, PropertyListenable, Rotatable {
     public static final String HEADING       = "heading";
@@ -70,9 +74,9 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private TR  	tr;
     private boolean 	visible = true;
     private GL33Model   model;
-    private int[] 	triangleObjectDefinitions;
-    private int[] 	transparentTriangleObjectDefinitions;
-    protected volatile Integer 	matrixID;
+    //private int[] 	triangleObjectDefinitions;
+    //private int[] 	transparentTriangleObjectDefinitions;
+    //protected volatile Integer 	matrixID;
     private volatile WeakReference<SpacePartitioningGrid<? extends Positionable>> containingGrid;
     //private List<Behavior> 		inactiveBehaviors  = new CopyOnWriteArrayList<Behavior>();
     //private List<CollisionBehavior>	collisionBehaviors = new CopyOnWriteArrayList<CollisionBehavior>();
@@ -100,16 +104,47 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     private String debugName            = "[unnamed]";
     
     //Cache
-    private       GPU                    gpu;
+    //private       GPU                    gpu;
     private       MatrixWindow           matrixWindow;
-    private       ObjectDefinitionWindow objectDefinitionWindow;
+    //private       ObjectDefinitionWindow objectDefinitionWindow;
     
     private CollectionActionDispatcher<VEC4Address> opaqueObjectDefinitionAddressesInVEC4      = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
     private CollectionActionDispatcher<VEC4Address> transparentObjectDefinitionAddressesInVEC4 = new CollectionActionDispatcher<VEC4Address>(new ArrayList<VEC4Address>());
+
+    private final AtomicReference<Integer> matrixID = new AtomicReference<>();
+    private final AtomicReference<GPU> gpu = new AtomicReference<>();
+    private final AtomicReference<int[]> transparentTriangleObjectDefinitions = new AtomicReference<>();
+    private final AtomicReference<int[]> triangleObjectDefinitions = new AtomicReference<>();
+    private final AtomicReference<ObjectDefinitionWindow> objectDefinitionWindow = new AtomicReference<>();
     
     protected final WeakPropertyChangeSupport pcs = new WeakPropertyChangeSupport(new PropertyChangeSupport(this));
 
+    private final CleaningAction cleaningAction;
     //private TRFutureTask<Void> objectDefinitionsFuture;
+    
+    @AllArgsConstructor
+    private static class CleaningAction implements Runnable {
+	private final AtomicReference<Integer> matrixID;
+	private final AtomicReference<GPU> gpu;
+	private final AtomicReference<int[]> transparentTriangleObjectDefinitions;
+	private final AtomicReference<int[]> triangleObjectDefinitions;
+	private final AtomicReference<ObjectDefinitionWindow> objectDefinitionWindow;
+
+	@Override
+	public void run() {
+	    System.out.println("WorldObject cleaning action...");
+	    //final TR tr = getTr();
+	    if(matrixID!=null)
+		gpu.get().matrixWindow.get().freeLater(matrixID.get());
+	    if(transparentTriangleObjectDefinitions!=null)
+		for(int def:transparentTriangleObjectDefinitions.get())
+		    objectDefinitionWindow.get().freeLater(def);
+	    if(triangleObjectDefinitions.get()!=null)
+		for(int def:triangleObjectDefinitions.get())
+		    objectDefinitionWindow.get().freeLater(def);
+	}//end run()
+
+    }//end CleaningAction
     
     public enum RenderFlags{
 	IgnoreCamera((byte)0x1);
@@ -132,6 +167,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 	tMd[10] = 1;
 	tMd[15] = 1;
 	
+	cleaningAction = new CleaningAction(matrixID, gpu, transparentTriangleObjectDefinitions, triangleObjectDefinitions, objectDefinitionWindow);
+	Util.CLEANER.register(this, cleaningAction);
 	//Keep because of race condition of multiple threads grabbing multiple IDs; 
 	//object defs end up with different ID from matrix writes and things disappear from invalid matrices containing DEADBEEF
 	//getMatrixID();//TODO: Some sort of refactor? matrix should init once and be left alone, no need to lazy-load.
@@ -276,11 +313,11 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }// end setModel(...)
     
     private void releaseCurrentModel(){
-	if(transparentTriangleObjectDefinitions!=null)
-	    for(int def:transparentTriangleObjectDefinitions)
+	if(transparentTriangleObjectDefinitions.get()!=null)
+	    for(int def:transparentTriangleObjectDefinitions.get())
 		getObjectDefinitionWindow().freeLater(def);
 	if(triangleObjectDefinitions!=null)
-	    for(int def:triangleObjectDefinitions)
+	    for(int def:triangleObjectDefinitions.get())
 		getObjectDefinitionWindow().freeLater(def);
 	Renderer.RENDER_LIST_EXECUTOR.submit(new Runnable(){
 	    @Override
@@ -289,8 +326,8 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 		getTransparentObjectDefinitionAddressesInVEC4().clear();
 	    }});
 	
-	transparentTriangleObjectDefinitions = null;
-	triangleObjectDefinitions            = null;
+	transparentTriangleObjectDefinitions.set(null);
+	triangleObjectDefinitions.set(null);
 	this.model            = null;
 	//objectDefsInitialized = false;
     }//end releaseCurrentModel()
@@ -871,7 +908,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     public void setRespondToTick(boolean respondToTick) {
         this.respondToTick = respondToTick;
     }
-    
+    /*
     @Override
     public void finalize() throws Throwable{
 	//final TR tr = getTr();
@@ -886,6 +923,7 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
 
 	super.finalize();
     }//end finalize()
+    */
     /**
      * @param modelOffset the modelOffset to set
      */
@@ -984,13 +1022,15 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }
 
     protected int[] getTriangleObjectDefinitions() {
-        return triangleObjectDefinitions = 
-        	getObjectDefinitions(triangleObjectDefinitions, getModel().getTriangleList());
+        triangleObjectDefinitions.set( 
+        	getObjectDefinitions(triangleObjectDefinitions.get(), getModel().getTriangleList()));
+        return triangleObjectDefinitions.get();
     }
 
     protected int[] getTransparentTriangleObjectDefinitions() {
-        return transparentTriangleObjectDefinitions = 
-        	getObjectDefinitions(transparentTriangleObjectDefinitions, getModel().getTransparentTriangleList());
+        transparentTriangleObjectDefinitions.set(
+        	getObjectDefinitions(transparentTriangleObjectDefinitions.get(), getModel().getTransparentTriangleList()));
+        return transparentTriangleObjectDefinitions.get();
     }
     
     protected int[] getObjectDefinitions(int [] originalObjectDefs, PrimitiveList<?> pList){
@@ -1027,19 +1067,19 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }
 
     protected Integer getMatrixID() {
-	if(matrixID == null)
+	if(matrixID.get() == null)
 	    return getMatrixSafe();
-        return matrixID;
+        return matrixID.get();
     }
     
     private synchronized Integer getMatrixSafe(){
-	if(matrixID == null)
-	    matrixID = getGpu().matrixWindow.get().create();
-        return matrixID;
+	if(matrixID.get() == null)
+	    matrixID.set(getGpu().matrixWindow.get().create());
+        return matrixID.get();
     }
 
     public void setMatrixID(Integer matrixID) {
-        this.matrixID = matrixID;
+        this.matrixID.set(matrixID);
     }
 
     protected double getScale() {
@@ -1075,13 +1115,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }
 
     GPU getGpu() {
-	if(gpu == null)
-	    gpu = Features.get(getTr(), GPUFeature.class);
-        return gpu;
+	if(gpu.get() == null)
+	    gpu.set(Features.get(getTr(), GPUFeature.class));
+        return gpu.get();
     }
 
     void setGpu(GPU gpu) {
-        this.gpu = gpu;
+        this.gpu.set(gpu);
     }
 
     public MatrixWindow getMatrixWindow() {
@@ -1095,13 +1135,13 @@ public class WorldObject implements PositionedRenderable, PropertyListenable, Ro
     }
 
     ObjectDefinitionWindow getObjectDefinitionWindow() {
-	if(objectDefinitionWindow == null)
-	    objectDefinitionWindow = getGpu().objectDefinitionWindow.get();
-        return objectDefinitionWindow;
+	if(objectDefinitionWindow.get() == null)
+	    objectDefinitionWindow.set(getGpu().objectDefinitionWindow.get());
+        return objectDefinitionWindow.get();
     }
 
     void setObjectDefinitionWindow(ObjectDefinitionWindow objectDefinitionWindow) {
-        this.objectDefinitionWindow = objectDefinitionWindow;
+        this.objectDefinitionWindow.set(objectDefinitionWindow);
     }
 
     public String getDebugName() {

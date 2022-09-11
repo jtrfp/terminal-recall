@@ -13,6 +13,7 @@
 package org.jtrfp.trcl.tools;
 
 import java.awt.Color;
+import java.lang.ref.Cleaner;
 import java.lang.reflect.Method;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -39,6 +40,9 @@ import org.jtrfp.trcl.math.Vect3D;
 import com.ochafik.util.Adapter;
 
 public class Util {
+    
+    public static final Cleaner CLEANER = Cleaner.create();
+    
 public static final Color [] DEFAULT_PALETTE = new Color []{
     new Color(0,0,0,0),
     new Color(7,7,7),

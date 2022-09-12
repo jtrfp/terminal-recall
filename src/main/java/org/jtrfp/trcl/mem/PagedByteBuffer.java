@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2022 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -28,6 +28,9 @@ import org.jtrfp.trcl.core.TRFactory;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.pool.IndexPool;
 import org.jtrfp.trcl.pool.IndexPool.OutOfIndicesException;
+import org.jtrfp.trcl.tools.Util;
+
+import lombok.AllArgsConstructor;
 
 public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final 	ByteBuffer [] 	intrinsic;//Should be size=1. Serves as an indirect reference.
@@ -39,6 +42,7 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     private final	GPU		gpu;
     private final	WeakReference<PagedByteBuffer> weakThis;
     private final       ByteBufferContextSupport contextSupport = new ByteBufferContextSupport();
+    private final CleaningAction cleaningAction;
     
     PagedByteBuffer(GPU gpu, ByteBuffer [] intrinsic, IndexPool pageIndexPool, int initialSizeInBytes, String debugName){
 	this.intrinsic=intrinsic;
@@ -53,7 +57,23 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	this.gpu=gpu;
 	weakThis = new WeakReference<PagedByteBuffer>(this);
 	gpu.memoryManager.get().registerPagedByteBuffer(weakThis);
+	cleaningAction = new CleaningAction(weakThis, pageIndexPool, pageTable, gpu);
+	Util.CLEANER.register(this, cleaningAction);
     }//end constructor
+    
+    @AllArgsConstructor
+    private static class CleaningAction implements Runnable {
+	private final WeakReference<PagedByteBuffer> weakThis;
+	private final IndexPool pageIndexPool;
+	private final ListActionDispatcher<Integer> pageTable;
+	private final GPU gpu;
+	@Override
+	public void run() {
+	    System.out.println("PagedByteBuffer Cleaning Action...");
+	    pageIndexPool.free(pageTable);
+	    gpu.memoryManager.get().deRegisterPagedByteBuffer(weakThis);
+	}
+    }//end CleaningAction
     
     public int sizeInPages(){
 	return pageTable.size();
@@ -113,11 +133,11 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
 	    }*/
 	}//end if(pageNumDelta...)
     }//end resize()
-    
+    /*
     private void deallocate(){
 	pageIndexPool.free(pageTable);
     }//end deallocate()
-    
+    */
     void markPageStale(int indexInBytes){
 	synchronized(stalePages){
 	 stalePages.set(indexInBytes/PagedByteBuffer.PAGE_SIZE_BYTES);
@@ -128,13 +148,14 @@ public final class PagedByteBuffer  implements IByteBuffer, Resizeable{
     /**
      * Must notify the page IndexPool that this buffer is being forgotten such that its pages may be freed.
      */
+    /*
     @Override
     public void finalize() throws Throwable{
 	deallocate();
 	gpu.memoryManager.get().deRegisterPagedByteBuffer(weakThis);
 	super.finalize();
     }//end finalize()
-
+*/
     @Override
     public IByteBuffer putShort(int indexInBytes, short val) {
 	markPageStale(indexInBytes);

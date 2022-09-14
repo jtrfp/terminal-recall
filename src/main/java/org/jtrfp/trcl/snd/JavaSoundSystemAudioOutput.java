@@ -13,12 +13,14 @@
 
 package org.jtrfp.trcl.snd;
 
+import java.lang.ref.Cleaner;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioFormat.Encoding;
@@ -29,6 +31,10 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 
+import org.jtrfp.trcl.tools.Util;
+
+import lombok.AllArgsConstructor;
+
 public class JavaSoundSystemAudioOutput implements AudioDriver {
     private static final DummyAudioDriver DUMMY_DRIVER = new DummyAudioDriver();
     private static final AudioFormat.Encoding encoding = AudioFormat.Encoding.PCM_SIGNED;
@@ -36,10 +42,12 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
     private AudioFormat format;
     private ByteBuffer     buffer;
     private int            bufferSizeFrames;
-    private SourceDataLine sourceDataLine;
+    //private SourceDataLine sourceDataLine;
+    private final AtomicReference<SourceDataLine> sourceDataLine = new AtomicReference<>();
     private JavaSoundOutput        output;
     private Collection<AudioDevice>devices;
     private SampleSubmitter		   activePutter;
+    private final Cleaner.Cleanable cleanable;
     
     public JavaSoundSystemAudioOutput() {
 	setFormat(new AudioFormat(
@@ -51,7 +59,27 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
 		    44100,
 		    ByteOrder.nativeOrder()==ByteOrder.BIG_ENDIAN,
 		    new HashMap<String,Object>()));//Default
+	
+	cleanable = Util.CLEANER.register(this, new CleaningAction(sourceDataLine));
     }//end constructor
+    
+    @AllArgsConstructor
+    private static class CleaningAction implements Runnable {
+	private final AtomicReference<SourceDataLine> sdl;
+	
+	@Override
+	public void run() {
+	    System.out.println("JavaSoundSystemAudioOutput cleaning action...");
+	    final SourceDataLine sdl = this.sdl.get();
+	    if(sdl!=null)
+		if(sdl.isOpen()){
+		    if(sdl.isRunning() || sdl.isActive())
+			sdl.stop();
+		    sdl.close();
+		}
+	    this.sdl.set(null);
+	}//end run()
+    }//end CleaningAction
     
     @Override
     public synchronized void setFormat(AudioFormat format) {
@@ -168,12 +196,14 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
     public synchronized SourceDataLine getSourceDataLine() throws LineUnavailableException{
 	if(output==null)
 	    throw new LineUnavailableException();
-	if(sourceDataLine==null){
+	SourceDataLine sdl = sourceDataLine.get();
+	if(sdl==null){
 	        setSourceDataLine((SourceDataLine) AudioSystem.getLine(output.info));
-	        sourceDataLine.open(format);
-	        sourceDataLine.start();
+	        sdl = sourceDataLine.get();
+	        sdl.open(format);
+	        sdl.start();
 	}//end if(sourceDataLine==null)
-        return sourceDataLine;
+        return sourceDataLine.get();
     }//end getSourceDataLine()
 
     /**
@@ -218,7 +248,7 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
      */
     public synchronized void setSourceDataLine(SourceDataLine sourceDataLine) {
 	ensureSourceDataLineIsReleased();
-        this.sourceDataLine = sourceDataLine;
+        this.sourceDataLine.set(sourceDataLine);
     }
     
     @Override
@@ -393,25 +423,28 @@ public class JavaSoundSystemAudioOutput implements AudioDriver {
     }
     
     private void ensureSourceDataLineIsReleased(){
-	if(sourceDataLine!=null)
-	    if(sourceDataLine.isOpen()){
-		if(sourceDataLine.isRunning() || sourceDataLine.isActive())
-		    sourceDataLine.stop();
-		sourceDataLine.close();
+	final SourceDataLine sdl = sourceDataLine.get();
+	if(sdl!=null)
+	    if(sdl.isOpen()){
+		if(sdl.isRunning() || sdl.isActive())
+		    sdl.stop();
+		sdl.close();
 		}
-	sourceDataLine=null;
+	sourceDataLine.set(null);
     }//end ensureSourceDataLineIsReleased()
 
     @Override
     public synchronized void release() {
-	ensureSourceDataLineIsReleased();
+	//ensureSourceDataLineIsReleased();
+	cleanable.clean();
     }
     
+    /*
     @Override
     public synchronized void finalize() throws Throwable{
 	release();
 	super.finalize();
-    }
+    }*/
 
     @Override
     public AudioDevice getDefaultDevice() {

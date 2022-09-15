@@ -20,32 +20,24 @@ public class MavenBuildInformation implements BuildInformation {
     private static final String NOT_AVAILABLE_BRANCH_NAME   = "${scmBranch}";
     private static final String PROPERTIES_RESOURCE_PATH    = "buildNumber.properties";
     
-    private String     uniqueBuildId = "[build ID not available]";
-    private String     branch        = "[branch ID not available]";
     private Properties properties;
 
     @Override
     public String getUniqueBuildId() {
-	if( uniqueBuildId == null ) {
-	    final Properties properties = getProperties();
-	    uniqueBuildId = properties.getProperty("git-sha-1");
-	    if( uniqueBuildId != null )
-		if( uniqueBuildId.equals(NOT_AVAILABLE_BUILD_ID) )
-		    uniqueBuildId = null;
-	}//end if(null)
-	return uniqueBuildId;
+	final String result = getProperties().getProperty("git-sha-1");
+	if( result == null || result.contentEquals(NOT_AVAILABLE_BUILD_ID))
+	    return "[build ID not available]";
+	else
+	    return result;
     }//end getUniqueBuildId()
 
     @Override
     public String getBranch() {
-	if( branch == null ) {
-	    final Properties properties = getProperties();
-	    branch = properties.getProperty("branch");
-	    if( branch != null )
-		if( branch.equals(NOT_AVAILABLE_BRANCH_NAME) )
-		    branch = null;
-	}//end if(null)
-	return branch;
+	final String result = getProperties().getProperty("branch");
+	if( result == null || result.contentEquals(NOT_AVAILABLE_BRANCH_NAME))
+	    return "[branch ID not available]";
+	else
+	    return result;
     }//end getBranch()
     
     protected Properties getProperties() {

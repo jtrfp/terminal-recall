@@ -43,10 +43,12 @@ import javax.swing.filechooser.FileFilter;
 
 import org.jtrfp.trcl.gui.GLExecutable;
 import org.jtrfp.trcl.mem.MemoryManager;
+import org.jtrfp.trcl.tools.Util;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 public final class GLTexture {
@@ -56,7 +58,7 @@ public final class GLTexture {
     private final int textureID = generateTextureID();
     private int rawSideLength;
     //private final GL3 gl;
-    private int bindingTarget = GL3.GL_TEXTURE_2D;
+    private int []bindingTarget = {GL3.GL_TEXTURE_2D};
     private int internalColorFormat = GL3.GL_RGBA8;
     private boolean deleted=false;
     private static GLProgram textureRenderProgram;
@@ -66,17 +68,40 @@ public final class GLTexture {
     private int preferredUpdateIntervalMillis = 500;
     private int width,height,numComponents;
 
-    public GLTexture(final GPU gpu) {//TODO: Remove TR dependency
+    public GLTexture(final GPU gpu) {
 	System.out.println("Creating GL Texture...");
 	this.gpu  = gpu;
 	textureIDFuture = gpu.getGlExecutor().submitToGL(new GLExecutable<Integer, GL3>(){
 	    @Override
 	    public Integer execute(GL3 gl) throws Exception {
-		return GPU.newTextureID(gl);
+		final int tID = GPU.newTextureID(gl);
+		return tID;
 	    }});
 	// Setup the empty rows
+	Util.CLEANER.register(this, new CleaningAction(gpu, bindingTarget, getTextureID()));
 	System.out.println("...Done.");
     }// end constructor
+    
+    @AllArgsConstructor
+    private static class CleaningAction implements Runnable {
+	private final GPU gpu;
+	private final int [] bindingTarget;
+	private final int textureID;
+	
+	@Override
+	public void run() {
+	    try {
+		System.out.println("GLTexture cleaning action...");
+		gpu.getGlExecutor().submitToGL(new GLExecutable<Void,GL3>(){
+		    @Override
+		    public Void execute(GL3 gl) throws Exception {
+			deleteImpl(gl, bindingTarget[0], textureID);
+			return null;
+		    }}).get();
+	    } catch(Throwable t) {t.printStackTrace();}
+	}//end run()
+	
+    }//end CleaningAction
     
     private int numComponentsFromEnum(int glEnum){
 	switch(glEnum){
@@ -108,9 +133,9 @@ public final class GLTexture {
 	if(pixels==null && width*height*16 < MemoryManager.ZEROES.capacity()){
 	    pixels=MemoryManager.ZEROES;
 	    synchronized(pixels){
-		pixels.clear();gl.glTexImage2D(bindingTarget, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);}
+		pixels.clear();gl.glTexImage2D(bindingTarget[0], 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);}
 	    }//end if(null)
-	else gl.glTexImage2D(bindingTarget, 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
+	else gl.glTexImage2D(bindingTarget[0], 0, internalOrder, width, height, 0, colorOrder, numericalFormat, pixels);
 	return this;
     }
     public GLTexture setParameteri(int parameterName, int value, GL3 gl){
@@ -132,15 +157,15 @@ public final class GLTexture {
 	    public Void execute(GL3 gl) throws Exception {
 		rawSideLength = (int) Math.sqrt(buf.capacity() / 4);
 		buf.rewind();
-		gl.glBindTexture(bindingTarget, textureIDFuture.get());
+		gl.glBindTexture(bindingTarget[0], textureIDFuture.get());
 		/*FloatBuffer isoSize = FloatBuffer.wrap(new float[] { 0 });
 		gl.glGetFloatv(GL3.GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, isoSize);*/
 		System.out.println("Uploading texture...");
 		GLTexture.this.width=rawSideLength; GLTexture.this.height=rawSideLength;
 		setNumComponents(numComponentsFromEnum(GL3.GL_RGBA));
-		gl.glTexImage2D(bindingTarget, 0, internalColorFormat, rawSideLength,
+		gl.glTexImage2D(bindingTarget[0], 0, internalColorFormat, rawSideLength,
 			rawSideLength, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buf);
-		gl.glGenerateMipmap(bindingTarget);
+		gl.glGenerateMipmap(bindingTarget[0]);
 		System.out.println("\t...Done.");
 		return null;
 	    }}).get();}
@@ -153,9 +178,9 @@ public final class GLTexture {
 	    public Void execute(GL3 gl) throws Exception {
 		rawSideLength = (int) Math.sqrt(buf.capacity() / 4);
 		buf.rewind();
-		gl.glBindTexture(bindingTarget, textureIDFuture.get());
+		gl.glBindTexture(bindingTarget[0], textureIDFuture.get());
 		System.out.println("Getting texture...");
-		gl.glGetTexImage(bindingTarget, 0, components, componentType, buf);
+		gl.glGetTexImage(bindingTarget[0], 0, components, componentType, buf);
 		System.out.println("\t...Done.");
 		return null;
 	    }}).get();}
@@ -168,8 +193,8 @@ public final class GLTexture {
 	    gl.glTexParameteri(getBindingTarget(), GL3.GL_TEXTURE_MAX_LEVEL, numLevels-1);
 	    for(int level = 0; level < numLevels; level++){
 		final int xyDivisor = (int)Math.rint(Math.pow(2, level));
-		final int zDivisor  = bindingTarget == GL3.GL_TEXTURE_2D_ARRAY? 1 : xyDivisor;//Array vs true 3D
-	        gl.glTexImage3D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0]/xyDivisor, sideLengthsInTexels[1]/xyDivisor, sideLengthsInTexels[2]/zDivisor, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
+		final int zDivisor  = bindingTarget[0] == GL3.GL_TEXTURE_2D_ARRAY? 1 : xyDivisor;//Array vs true 3D
+	        gl.glTexImage3D(bindingTarget[0], level, internalColorFormat, sideLengthsInTexels[0]/xyDivisor, sideLengthsInTexels[1]/xyDivisor, sideLengthsInTexels[2]/zDivisor, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
 	    }
 	 //gl.glTexStorage3D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1], sideLengthsInTexels[2]);
 	    break;
@@ -177,15 +202,15 @@ public final class GLTexture {
 	    gl.glTexParameteri(getBindingTarget(), GL3.GL_TEXTURE_MAX_LEVEL, numLevels-1);
 	    for(int level = 0; level < numLevels; level++){
 		final int xDivisor = (int)Math.rint(Math.pow(2, level));
-		final int yDivisor  = bindingTarget == GL3.GL_TEXTURE_1D_ARRAY? 1 : xDivisor;//Array vs true 2D
-		     gl.glTexImage2D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0]/xDivisor, sideLengthsInTexels[1]/yDivisor, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
+		final int yDivisor  = bindingTarget[0] == GL3.GL_TEXTURE_1D_ARRAY? 1 : xDivisor;//Array vs true 2D
+		     gl.glTexImage2D(bindingTarget[0], level, internalColorFormat, sideLengthsInTexels[0]/xDivisor, sideLengthsInTexels[1]/yDivisor, 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
 	    //gl.glTexStorage2D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0], sideLengthsInTexels[1]);
 	    }//end for(levels)
 	    break;
 	}case 1:{
 	    gl.glTexParameteri(getBindingTarget(), GL3.GL_TEXTURE_MAX_LEVEL, numLevels-1);
 	    for(int level = 0; level < numLevels; level++)
-		     gl.glTexImage1D(bindingTarget, level, internalColorFormat, sideLengthsInTexels[0]/(int)Math.rint(Math.pow(2, level)), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
+		     gl.glTexImage1D(bindingTarget[0], level, internalColorFormat, sideLengthsInTexels[0]/(int)Math.rint(Math.pow(2, level)), 0, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, null);
 	    //gl.glTexStorage1D(bindingTarget, numLevels, internalColorFormat, sideLengthsInTexels[0]);
 	    break;
 	}
@@ -200,14 +225,14 @@ public final class GLTexture {
 	    throw new RuntimeException("Texel coordinate dims ("+texelCoordinates.length+") must match sideLength dims ("+sideLengthsInTexels.length+").");
 	switch(texelCoordinates.length){
 	case 1:{
-	    gl.glTexSubImage1D(bindingTarget, level, texelCoordinates[0], sideLengthsInTexels[0], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
+	    gl.glTexSubImage1D(bindingTarget[0], level, texelCoordinates[0], sideLengthsInTexels[0], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
 	    break;
 	}case 2:{
-	    gl.glTexSubImage2D(bindingTarget, level, texelCoordinates[0],texelCoordinates[1], sideLengthsInTexels[0], sideLengthsInTexels[1], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
+	    gl.glTexSubImage2D(bindingTarget[0], level, texelCoordinates[0],texelCoordinates[1], sideLengthsInTexels[0], sideLengthsInTexels[1], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
 	    break;
 	}case 3:{
 	    if(level<0)throw new RuntimeException("Level is intolerably negative: "+level);
-	    gl.glTexSubImage3D(bindingTarget, level, texelCoordinates[0],texelCoordinates[1],texelCoordinates[2], sideLengthsInTexels[0], sideLengthsInTexels[1],sideLengthsInTexels[2], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
+	    gl.glTexSubImage3D(bindingTarget[0], level, texelCoordinates[0],texelCoordinates[1],texelCoordinates[2], sideLengthsInTexels[0], sideLengthsInTexels[1],sideLengthsInTexels[2], GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, texels);
 	    break;
 	}
 	default:{
@@ -219,9 +244,13 @@ public final class GLTexture {
     public void delete(GL3 gl) {
 	if(isDeleted())
 	    return;
-	gl.glBindTexture(bindingTarget, getId());
-	gl.glDeleteTextures(1, IntBuffer.wrap(new int[] { getTextureID() }));
+	deleteImpl(gl, bindingTarget[0], getId());
 	deleted=true;
+    }
+    
+    private static void deleteImpl(GL3 gl, int bindingTarget, int textureID) {
+	gl.glBindTexture(bindingTarget, textureID);
+	gl.glDeleteTextures(1, IntBuffer.wrap(new int[] { textureID }));
     }
 
     public static void specifyTextureUnit(GL gl, int unitNumber) {
@@ -230,7 +259,7 @@ public final class GLTexture {
     
     
     public GLTexture bind(GL gl) {
-	gl.glBindTexture(bindingTarget, getTextureID());
+	gl.glBindTexture(bindingTarget[0], getTextureID());
 	return this;
     }
     
@@ -245,23 +274,23 @@ public final class GLTexture {
     }
 
     public GLTexture setMagFilter(int mode, GL3 gl) {
-	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_MAG_FILTER, mode);
+	gl.glTexParameteri(bindingTarget[0], GL3.GL_TEXTURE_MAG_FILTER, mode);
 	return this;
     }
     public GLTexture setMinFilter(int mode, GL3 gl){
-	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_MIN_FILTER, mode);
+	gl.glTexParameteri(bindingTarget[0], GL3.GL_TEXTURE_MIN_FILTER, mode);
 	return this;
     }
     public GLTexture setWrapR(int wrappingMode, GL3 gl) {
-	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_R, wrappingMode);
+	gl.glTexParameteri(bindingTarget[0], GL3.GL_TEXTURE_WRAP_R, wrappingMode);
 	return this;
     }
     public GLTexture setWrapS(int wrappingMode, GL3 gl) {
-	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_S, wrappingMode);
+	gl.glTexParameteri(bindingTarget[0], GL3.GL_TEXTURE_WRAP_S, wrappingMode);
 	return this;
     }
     public GLTexture setWrapT(int wrappingMode, GL3 gl) {
-	gl.glTexParameteri(bindingTarget, GL3.GL_TEXTURE_WRAP_T, wrappingMode);
+	gl.glTexParameteri(bindingTarget[0], GL3.GL_TEXTURE_WRAP_T, wrappingMode);
 	return this;
     }
 
@@ -269,14 +298,14 @@ public final class GLTexture {
      * @return the bindingTarget
      */
     public int getBindingTarget() {
-        return bindingTarget;
+        return bindingTarget[0];
     }
 
     /**
      * @param bindingTarget the bindingTarget to set
      */
     public GLTexture setBindingTarget(int bindingTarget) {
-        this.bindingTarget = bindingTarget;
+        this.bindingTarget[0] = bindingTarget;
         return this;
     }
 
@@ -299,7 +328,7 @@ public final class GLTexture {
 	    int internalFormat, int width, int height, boolean fixedSampleLocations, GL3 gl) {
 	this.width=width; this.height=height;
 	//TODO: Num components
-	gl.glTexImage2DMultisample(bindingTarget, samples, internalFormat, width, height, fixedSampleLocations);
+	gl.glTexImage2DMultisample(bindingTarget[0], samples, internalFormat, width, height, fixedSampleLocations);
 	return this;
     }
 
@@ -307,15 +336,15 @@ public final class GLTexture {
 	    FloatBuffer pixels, GL3 gl) {
 	this.width=width; this.height=1;
 	setNumComponents(numComponentsFromEnum(internalOrder));
-	gl.glTexImage1D(bindingTarget, 0, internalFormat, width, 0, internalOrder, numericalFormat, pixels);
+	gl.glTexImage1D(bindingTarget[0], 0, internalFormat, width, 0, internalOrder, numericalFormat, pixels);
 	return this;
     }
 
     public GLTexture readPixels(PixelReadOrder pixelReadOrder, PixelReadDataType pixelReadDataType, ByteBuffer buffer, GL3 gl) {
-	gl.glGetTexImage(bindingTarget, 0, pixelReadOrder.getGlEnum(), pixelReadDataType.getGlEnum(), buffer);
+	gl.glGetTexImage(bindingTarget[0], 0, pixelReadOrder.getGlEnum(), pixelReadDataType.getGlEnum(), buffer);
 	return this;
     }
-    
+    /*
     @Override
     public void finalize() throws Throwable{
 	gpu.getGlExecutor().submitToGL(new GLExecutable<Void,GL3>(){
@@ -325,7 +354,7 @@ public final class GLTexture {
 		return null;
 	    }}).get();
 	super.finalize();
-    }
+    }*/
 
     /**
      * @return the deleted

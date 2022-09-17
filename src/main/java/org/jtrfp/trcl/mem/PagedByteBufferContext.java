@@ -26,92 +26,111 @@ import org.apache.commons.collections.primitives.ByteList;
 import org.apache.commons.collections.primitives.FloatList;
 import org.apache.commons.collections.primitives.IntList;
 import org.apache.commons.collections.primitives.ShortList;
+import org.jtrfp.trcl.tools.Util;
+
+import lombok.AllArgsConstructor;
 
 public class PagedByteBufferContext implements IByteBuffer, Flushable {
     private PagedByteBuffer pagedByteBuffer;
     
-    private FloatList floatsToSet  = new ArrayFloatList();
-    private IntList   floatIndices = new ArrayIntList();
+    private final FloatList []floatsToSet  = {new ArrayFloatList()};
+    private final IntList   []floatIndices = {new ArrayIntList()};
     
-    private ShortList shortsToSet  = new ArrayShortList();
-    private IntList   shortIndices = new ArrayIntList();
+    private final ShortList []shortsToSet  = {new ArrayShortList()};
+    private final IntList   []shortIndices = {new ArrayIntList()};
     
-    private IntList   intsToSet    = new ArrayIntList();
-    private IntList   intIndices   = new ArrayIntList();;
+    private final IntList   []intsToSet    = {new ArrayIntList()};
+    private final IntList   []intIndices   = {new ArrayIntList()};
     
-    private ByteList  bytesToSet   = new ArrayByteList();
-    private IntList   byteIndices  = new ArrayIntList();
+    private final ByteList  []bytesToSet   = {new ArrayByteList()};
+    private final IntList   []byteIndices  = {new ArrayIntList()};
     
-    private BitSet    stalePages   = new BitSet();
+    private final BitSet    []stalePages   = {new BitSet()};
+    
+    private final CleaningAction cleaningAction;
+    
+    public PagedByteBufferContext() {
+	cleaningAction = new CleaningAction(floatsToSet,shortsToSet,intsToSet,bytesToSet,stalePages);
+	Util.CLEANER.register(this, cleaningAction);
+    }
+    
+    @AllArgsConstructor
+    private static class CleaningAction implements Runnable {
+	private final FloatList []floatsToSet;
+	private final ShortList []shortsToSet;
+	private final IntList   []intsToSet;
+	private final ByteList  []bytesToSet;
+	private final BitSet    []stalePages;
+
+	@Override
+	public void run() {
+	    System.out.println("PagedByteBufferContext cleaning action...");
+	    if(!floatsToSet[0].isEmpty())
+		new RuntimeException("FloatsToSet unflushed following finalization!").printStackTrace();
+	    if(!intsToSet[0].isEmpty())
+		new RuntimeException("intsToSet unflushed following finalization!").printStackTrace();
+	    if(!shortsToSet[0].isEmpty())
+		new RuntimeException("ShortsToSet unflushed following finalization!").printStackTrace();
+	    if(!bytesToSet[0].isEmpty())
+		new RuntimeException("BytesToSet unflushed following finalization!").printStackTrace();
+	    if(stalePages[0].cardinality() != 0)
+		new RuntimeException("Stalepages unflushed following finalization!").printStackTrace();
+	}
+    }//end CleaningAction
 
     @Override
     public void flush() throws IOException {
 	getPagedByteBuffer().flush( 
-		floatsToSet,
-		floatIndices,
-		shortsToSet,
-		shortIndices,
-		intsToSet,
-		intIndices,
-		bytesToSet,
-		byteIndices,
-		stalePages);
+		floatsToSet[0],
+		floatIndices[0],
+		shortsToSet[0],
+		shortIndices[0],
+		intsToSet[0],
+		intIndices[0],
+		bytesToSet[0],
+		byteIndices[0],
+		stalePages[0]);
 
-	floatsToSet  = new ArrayFloatList();
-	floatIndices = new ArrayIntList();
+	floatsToSet[0]  = new ArrayFloatList();
+	floatIndices[0] = new ArrayIntList();
 
-	shortsToSet  = new ArrayShortList();
-	shortIndices = new ArrayIntList();
+	shortsToSet[0]  = new ArrayShortList();
+	shortIndices[0] = new ArrayIntList();
 
-	intsToSet    = new ArrayIntList();
-	intIndices   = new ArrayIntList();;
+	intsToSet[0]    = new ArrayIntList();
+	intIndices[0]   = new ArrayIntList();
 
-	bytesToSet   = new ArrayByteList();
-	byteIndices  = new ArrayIntList();
+	bytesToSet[0]   = new ArrayByteList();
+	byteIndices[0]  = new ArrayIntList();
 	
-	stalePages   = new BitSet();
+	stalePages[0]   = new BitSet();
     }//end flush()
     
-    @Override
-    public void finalize() throws Throwable{
-	if(!floatsToSet.isEmpty())
-	    new RuntimeException("FloatsToSet unflushed following finalization!").printStackTrace();
-	if(!intsToSet.isEmpty())
-	    new RuntimeException("intsToSet unflushed following finalization!").printStackTrace();
-	if(!shortsToSet.isEmpty())
-	    new RuntimeException("ShortsToSet unflushed following finalization!").printStackTrace();
-	if(!bytesToSet.isEmpty())
-	    new RuntimeException("BytesToSet unflushed following finalization!").printStackTrace();
-	if(stalePages.cardinality() != 0)
-	    new RuntimeException("Stalepages unflushed following finalization!").printStackTrace();
-	super.finalize();
-    }
-    
     int getNumStalePages(){
-	return stalePages.cardinality();
+	return stalePages[0].cardinality();
     }
     
     int getNumShortsToSet(){
-	return shortsToSet.size();
+	return shortsToSet[0].size();
     }
     
     int getNumIntsToSet(){
-	return intsToSet.size();
+	return intsToSet[0].size();
     }
     
     int getBytesToSet(){
-	return bytesToSet.size();
+	return bytesToSet[0].size();
     }
     
     int getNumFloatsToSet(){
-	return floatsToSet.size();
+	return floatsToSet[0].size();
     }
     
     @Override
     public IByteBuffer putInt(int indexInBytes, int val) {
 	markPageStale(indexInBytes);
-	intIndices.add(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes));
-	intsToSet.add(val);
+	intIndices[0].add(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes));
+	intsToSet[0].add(val);
 	return this;
     }
 
@@ -130,24 +149,24 @@ public class PagedByteBufferContext implements IByteBuffer, Flushable {
     public IByteBuffer putShort(int indexInBytes, short val) {
 	markPageStale(indexInBytes);
 	int index=getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes);
-	shortIndices.add(index);
-	shortsToSet.add(val);
+	shortIndices[0].add(index);
+	shortsToSet[0].add(val);
 	return this;
     }
 
     @Override
     public IByteBuffer put(int indexInBytes, byte val) {
 	markPageStale(indexInBytes);
-	byteIndices.add(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes));
-	bytesToSet.add(val);
+	byteIndices[0].add(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes));
+	bytesToSet[0].add(val);
 	return this;
     }
     
     @Override
     public IByteBuffer putFloat(int indexInBytes, float val) {
 	markPageStale(indexInBytes);
-	floatIndices.add(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes));
-	floatsToSet.add(val);
+	floatIndices[0].add(getPagedByteBuffer().logicalIndex2PhysicalIndex(indexInBytes));
+	floatsToSet[0].add(val);
 	return this;
     }
     
@@ -201,7 +220,7 @@ public class PagedByteBufferContext implements IByteBuffer, Flushable {
     }
     
     private void markPageStale(int indexInBytes){
-	stalePages.set(indexInBytes/PagedByteBuffer.PAGE_SIZE_BYTES);
+	stalePages[0].set(indexInBytes/PagedByteBuffer.PAGE_SIZE_BYTES);
     }
 
 }//end PagedByteBufferContext

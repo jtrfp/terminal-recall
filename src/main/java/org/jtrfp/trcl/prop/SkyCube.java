@@ -17,31 +17,55 @@ package org.jtrfp.trcl.prop;
 
 import java.awt.Color;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.jtrfp.trcl.gpu.GLTexture;
 import org.jtrfp.trcl.gpu.GPU;
 import org.jtrfp.trcl.gui.GLExecutable;
+import org.jtrfp.trcl.tools.Util;
 
 import com.jogamp.opengl.GL3;
 
+import lombok.AllArgsConstructor;
+
 public class SkyCube {
     private final    GPU        gpu;
-    private volatile GLTexture  skyCubeTexture;
+    private volatile AtomicReference<GLTexture>  skyCubeTexture = new AtomicReference<>();
     private volatile SkyCubeGen skyCubeGen=null;
     private AtomicBoolean	skyCubeGenStale = new AtomicBoolean(true);
     
     public SkyCube(GPU gpu){
 	this.gpu = gpu;
+	Util.CLEANER.register(this, new SkyCubeCleaner(skyCubeTexture,gpu));
     }
+    
+    @AllArgsConstructor
+    private static class SkyCubeCleaner implements Runnable {
+	private final AtomicReference<GLTexture> skyCubeTexture;
+	private final GPU gpu;
+	@Override
+	public void run() {
+	    System.out.println("SkyCube cleaning action...");
+	    final GLTexture sct = skyCubeTexture.get();
+	    if(sct!=null)
+		gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
+		    @Override
+		    public Void execute(GL3 gl) throws Exception {
+			sct.delete(gl);
+			return null;
+		    }});
+	}//end run()
+    }//end SkyCubeCleaner
     
     private void buildSkyCubeTextureGL(GL3 gl){
 	final SkyCubeGen cubeGen = getSkyCubeGen();
 	final int sideWidth = cubeGen.getSideWidth();
 	final int colorMode = GL3.GL_RGB8;
-	if(skyCubeTexture==null)
-	    skyCubeTexture = gpu
+	if(skyCubeTexture.get()==null)
+	    skyCubeTexture.set(gpu
 	    .newTexture()
-	    .setBindingTarget(GL3.GL_TEXTURE_CUBE_MAP);
+	    .setBindingTarget(GL3.GL_TEXTURE_CUBE_MAP));
+	final GLTexture skyCubeTexture = this.skyCubeTexture.get();
 	assert skyCubeTexture != null;
 	skyCubeTexture.bind(gl)
 	.setImagePositiveX(colorMode,sideWidth,sideWidth,GL3.GL_RGBA,GL3.GL_UNSIGNED_BYTE,cubeGen.getEast(), gl)
@@ -78,22 +102,10 @@ public class SkyCube {
         this.skyCubeGen = skyCubeGen;
         skyCubeGenStale.set(true);
     }//end setSkyCubeGen(...)
-    
-    @Override
-    public void finalize() throws Throwable{
-	if(skyCubeTexture!=null)
-	    gpu.getGlExecutor().submitToGL(new GLExecutable<Void, GL3>(){
-		@Override
-		public Void execute(GL3 gl) throws Exception {
-		    skyCubeTexture.delete(gl);
-		    return null;
-		}});
-	super.finalize();
-    }//end finalize()
 
     public GLTexture getSkyCubeTexture(GL3 gl) {
 	if(skyCubeGenStale.getAndSet(false)==true)
 	    buildSkyCubeTextureGL(gl);
-	return skyCubeTexture;
+	return skyCubeTexture.get();
     }
 }//end SkyCube

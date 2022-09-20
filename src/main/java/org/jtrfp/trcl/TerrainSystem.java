@@ -41,6 +41,9 @@ import org.jtrfp.trcl.obj.PortalEntrance;
 import org.jtrfp.trcl.obj.PortalExit;
 import org.jtrfp.trcl.obj.WorldObject;
 import org.jtrfp.trcl.shell.GameShellFactory.GameShell;
+import org.jtrfp.trcl.tools.Util;
+
+import lombok.AllArgsConstructor;
 
 public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	final double gridSquareSize;
@@ -392,7 +395,18 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
 	}// end for(gZ)
 	for(Future<Void> task:rowTasks)
 	    try{task.get();}catch(Exception e){throw new RuntimeException(e);}
+	Util.CLEANER.register(this, new CleaningAction(executor));
     }// end constructor
+    
+    @AllArgsConstructor
+    private static class CleaningAction implements Runnable {
+	private final ExecutorService executor;
+	@Override
+	public void run() {
+	    System.out.println("TerrainSystem cleaning action...");
+	    executor.shutdown();
+	}//end run()
+    }//end CleaningAction
 
     private class TunnelPoint{
 	final int x,z;
@@ -427,10 +441,11 @@ public final class TerrainSystem extends RenderableSpacePartitioningGrid{
     public double getGridSquareSize(){
 	return gridSquareSize;
     }
-
+/*
     @Override
     public void finalize() throws Throwable{
 	super.finalize();
 	executor.shutdown();
     }//end finalize()
+    */
 }//end TerrainSystem

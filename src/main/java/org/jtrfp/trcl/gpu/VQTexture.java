@@ -36,8 +36,11 @@ import org.jtrfp.trcl.img.vq.VectorListRasterizer;
 import org.jtrfp.trcl.math.Misc;
 import org.jtrfp.trcl.mem.PagedByteBuffer;
 import org.jtrfp.trcl.mem.VEC4Address;
+import org.jtrfp.trcl.tools.Util;
 
 import com.jogamp.opengl.GL3;
+
+import lombok.AllArgsConstructor;
 
 public class VQTexture implements Texture {
     private final TextureManager 	tm ;
@@ -46,7 +49,7 @@ public class VQTexture implements Texture {
     private final SubTextureWindow	stw;
     private 	  Color 		averageColor;
     private final String 		debugName;
-    private	  Integer		tocIndex;
+    private final Integer		tocIndex;
     private final ArrayList<Integer>	subTextureIDs = new ArrayList<Integer>();
     private final CompositeVectorListND subtextureVectorList = new CompositeVectorListND();
     private final ArrayList<Integer>	codebookStartOffsets256 = new ArrayList<Integer>();
@@ -63,8 +66,37 @@ public class VQTexture implements Texture {
    	this.tocWindow	  =tm.getTOCWindow();
    	this.stw	  =tm.getSubTextureWindow();
    	this.debugName	  =debugName.replace('.', '_');
+   	this.tocIndex     =getTocWindow().create();
+   	
+   	Util.CLEANER.register(this, new CleaningAction(tocWindow, tocIndex, stw, cbm, subTextureIDs, codebookStartOffsets256, finalizationHooks));
     }//end constructor
     
+    @AllArgsConstructor
+    private static class CleaningAction implements Runnable {
+	private final TextureTOCWindow tocWindow;
+	private final Integer tocIndex;
+	private final SubTextureWindow stw;
+	private final VQCodebookManager cbm;
+	private final ArrayList<Integer> subTextureIDs;
+	private final ArrayList<Integer> codebookStartOffsets256;
+	private final Collection<Runnable> finalizationHooks;
+	
+	@Override
+	public void run() {
+	    System.out.println("VQTexture cleaning actions...");
+	    //Undo the magic
+	    tocWindow.magic.set(tocIndex, 0000);
+	    //TOC ID
+	    if(tocIndex!=null)
+		tocWindow.freeLater(tocIndex);
+	    stw.freeLater(subTextureIDs);
+	    //Codebook entries
+	    cbm.freeCodebook256(codebookStartOffsets256);
+	    for(Runnable h:finalizationHooks)
+		h.run();
+	}//end run()
+    }//end CleaningAction
+    /*
     @Override
     public void finalize() throws Throwable{
 	//Undo the magic
@@ -79,7 +111,7 @@ public class VQTexture implements Texture {
 	    h.run();
 	super.finalize();
     }//end finalize()
-    
+    */
     public static ByteBuffer RGBA8FromPNG(InputStream is) {
 	try {
 	    BufferedImage bi = ImageIO.read(is);
@@ -225,14 +257,14 @@ public class VQTexture implements Texture {
     }
 
     public Integer getTocIndex() {
-	if(tocIndex == null)
-	    tocIndex = getTocWindow().create();
+	//if(tocIndex == null)
+	    //tocIndex = getTocWindow().create();
         return tocIndex;
-    }
+    }/*
 
     public void setTocIndex(Integer tocIndex) {
         this.tocIndex = tocIndex;
-    }
+    }*/
 
     public TextureTOCWindow getTocWindow() {
         return tocWindow;

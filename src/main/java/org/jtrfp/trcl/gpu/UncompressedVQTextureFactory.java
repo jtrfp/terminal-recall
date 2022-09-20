@@ -198,7 +198,7 @@ public class UncompressedVQTextureFactory {
 			// Calculate a rough average color by averaging random samples.
 			tex.setAverageColor(calulateAverageColor(rbvlRGBA));
 			// Get a TOC
-			tex.setTocIndex(tex.getTocWindow().create());
+			//tex.setTocIndex(tex.getTocWindow().create());
 			if(tex.getTexturePage()>=65536)
 			    throw new RuntimeException("Texture TOC page out of acceptable range: "+tex.getTexturePage()+"." +
 				    "\n This is to report anomalies relating to issue #112." +

@@ -50,17 +50,17 @@ import java.io.IOException;
  */
 class RawMouseInfo extends RawDeviceInfo {
 	private final RawDevice device;
-	private final int id;
+	//private final int id;
 	private final int num_buttons;
-	private final int sample_rate;
+	//private final int sample_rate;
 	
 	private static final int MAX_BUTTONS = 32;
 
 	public RawMouseInfo(RawDevice device, int id, int num_buttons, int sample_rate) {
 		this.device = device;
-		this.id = id;
+		//this.id = id;
 		this.num_buttons = num_buttons;
-		this.sample_rate = sample_rate;
+		//this.sample_rate = sample_rate;
 	}
 
 	public final int getUsage() {

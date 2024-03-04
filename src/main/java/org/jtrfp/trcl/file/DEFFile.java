@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -28,8 +29,10 @@ import org.jtrfp.jfdt.UnrecognizedFormatException;
 
 public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
     public DEFFile(InputStream is) throws IOException, IllegalAccessException {
-	super(is);
+	super(new BufferedInputStream(is,1024));
     }
+    
+    public DEFFile() {}
 
     int numEnemyDefinitions;
     ArrayList<EnemyDefinition> enemyDefinitions;

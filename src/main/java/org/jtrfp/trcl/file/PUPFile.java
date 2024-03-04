@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2014 Chuck Ritola
+ * Copyright (c) 2012-2024 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -12,13 +12,24 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.jtrfp.jfdt.Parser;
+import org.jtrfp.jfdt.SelfParsingFile;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 
-public class PUPFile implements ThirdPartyParseable {
-    int numPowerups;
-    PowerupLocation[] powerupLocations;
+public class PUPFile extends SelfParsingFile {
+    int numPowerups = 0;
+    PowerupLocation[] powerupLocations = new PowerupLocation[0];
+    
+    public PUPFile(InputStream is) throws IllegalAccessException, IOException {
+	super(new BufferedInputStream(is,1024));
+    }
+
+    public PUPFile() {}
 
     public static class PowerupLocation implements ThirdPartyParseable {
 	int x, y, z;

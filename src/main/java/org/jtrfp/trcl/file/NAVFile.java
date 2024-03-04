@@ -12,18 +12,28 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jtrfp.jfdt.ClassInclusion;
 import org.jtrfp.jfdt.FailureBehavior;
 import org.jtrfp.jfdt.Parser;
+import org.jtrfp.jfdt.SelfParsingFile;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 
-public class NAVFile implements ThirdPartyParseable {
+public class NAVFile extends SelfParsingFile {
     int numNavigationPoints;
     ArrayList<NAVSubObject> navObjects;
+    
+    public NAVFile(InputStream sourceStream) throws IOException, IllegalAccessException {
+	super(new BufferedInputStream(sourceStream,1024));
+    }
+    
+    public NAVFile() {}
 
     @Override
     public void describeFormat(Parser prs) throws UnrecognizedFormatException {
@@ -69,6 +79,11 @@ public class NAVFile implements ThirdPartyParseable {
 	 */
 	public void setDescription(String description) {
 	    this.description = description;
+	}
+	
+	@Override
+	public String toString() {
+	    return super.toString()+" loc="+locationOnMap.toString()+" desc="+description;
 	}
     }// end NAVSubObject
 

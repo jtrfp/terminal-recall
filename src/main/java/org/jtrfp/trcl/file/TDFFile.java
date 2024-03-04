@@ -12,14 +12,24 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.jtrfp.jfdt.ClassInclusion;
 import org.jtrfp.jfdt.Parser;
+import org.jtrfp.jfdt.SelfParsingFile;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 
-public class TDFFile implements ThirdPartyParseable {
+public class TDFFile extends SelfParsingFile {
     int numTunnels;
     Tunnel[] tunnels;
+    
+    public TDFFile(InputStream is) throws IllegalAccessException, IOException {
+	super(is);
+    }
+    
+    public TDFFile() {}
 
     @Override
     public void describeFormat(Parser prs) throws UnrecognizedFormatException {

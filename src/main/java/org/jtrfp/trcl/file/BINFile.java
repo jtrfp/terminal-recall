@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -35,8 +36,10 @@ public abstract class BINFile implements ThirdPartyParseable {
 	ArrayList<ThirdPartyParseable> dataBlocks;
 
 	public Model(InputStream is) throws IllegalAccessException, IOException {
-	    super(is);
+	    super(new BufferedInputStream(is,1024));
 	}
+	
+	public Model() {}
 
 	@Override
 	public void describeFormat(Parser prs)
@@ -376,6 +379,11 @@ public abstract class BINFile implements ThirdPartyParseable {
 				ClassInclusion.classOf(getFaceBlockVertexType()));
 		    }
 		}// end describeFormat(Parser prs)
+		
+		@Override
+		public String toString() {
+		    return getClass().getSimpleName()+" nX="+normalX+", nY="+normalY+", nZ="+normalZ+", magic="+magic+" numVertices="+numVertices;
+		}
 		
 		protected abstract Class<? extends FaceBlockVertex> getFaceBlockVertexType();
 		

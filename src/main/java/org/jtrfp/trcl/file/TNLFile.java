@@ -12,16 +12,25 @@
  ******************************************************************************/
 package org.jtrfp.trcl.file;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jtrfp.jfdt.Parser;
+import org.jtrfp.jfdt.SelfParsingFile;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 
-public class TNLFile implements ThirdPartyParseable {
+public class TNLFile extends SelfParsingFile {
     int numSegments;
     ArrayList<Segment> segments;
+    
+    public TNLFile() {}
+    
+    public TNLFile(InputStream is) throws IOException, IllegalAccessException {
+	super(is);
+    }
 
     private static void Int(String targetProperty, Parser parser) {
 	parser.stringEndingWith("\r\n",

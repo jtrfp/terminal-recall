@@ -75,10 +75,9 @@ public final class GLTexture {
 	    @Override
 	    public Integer execute(GL3 gl) throws Exception {
 		final int tID = GPU.newTextureID(gl);
+		Util.CLEANER.register(GLTexture.this, new CleaningAction(gpu, bindingTarget, tID));
 		return tID;
 	    }});
-	// Setup the empty rows
-	Util.CLEANER.register(this, new CleaningAction(gpu, bindingTarget, getTextureID()));
 	System.out.println("...Done.");
     }// end constructor
     

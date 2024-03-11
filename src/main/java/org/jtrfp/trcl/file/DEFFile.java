@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.jtrfp.jfdt.CSV;
 import org.jtrfp.jfdt.ClassInclusion;
@@ -62,10 +63,11 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	int numRandomFiringVertices;
 	Integer[] firingVertices = new Integer[8];
 	// ;NewHit
-	int numNewHBoxes;
-	int[] hboxVertices = new int[16];
+	//int numNewHBoxes;
+	//int[] hboxVertices = new int[16];
+	String hitboxVerticesString = "";
 	// !NewAtakRet
-	int attackDistance, retreatDistance;
+	int attackDistance, retreatDistance, numHboxVertcies;
 	boolean objectIsBoss;
 	int unknown;
 	String description;
@@ -122,6 +124,8 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 			FailureBehavior.UNRECOGNIZED_FORMAT);
 		prs.stringEndingWith(",",
 			prs.property("numNewHBoxes", int.class), false);
+		prs.stringEndingWith("\r\n", prs.property("hitboxVerticesString", String.class), false);
+		/*
 		for (int i = 0; i < 15; i++) {
 		    prs.stringEndingWith(",",
 			    prs.indexedProperty("hboxVertices", int.class, i),
@@ -130,6 +134,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			prs.indexedProperty("hboxVertices", int.class, 15),
 			false);// last one, ending in newline.
+		*/
 	    } catch (UnrecognizedFormatException e) {
 		System.out.println("NewHit not given for this def");
 	    }
@@ -469,7 +474,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	 * @return the numNewHBoxes
 	 */
 	public int getNumNewHBoxes() {
-	    return numNewHBoxes;
+	    return this.numHboxVertcies;
 	}
 
 	/**
@@ -477,14 +482,18 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	 *            the numNewHBoxes to set
 	 */
 	public void setNumNewHBoxes(int numNewHBoxes) {
-	    this.numNewHBoxes = numNewHBoxes;
+	    this.numHboxVertcies = numNewHBoxes;
 	}
 
 	/**
 	 * @return the hboxVertices
 	 */
 	public int[] getHboxVertices() {
-	    return hboxVertices;
+	    final String s = getHitboxVerticesString();
+	    final String[] ss = s.split("\\s*,\\s*");
+	    final String[] result = new String[this.numHboxVertcies];
+	    System.arraycopy(ss, 0, result, 0, this.numHboxVertcies);
+	    return Stream.of(result).map(str->Integer.parseInt(str)).mapToInt(x->x).toArray();
 	}
 
 	/**
@@ -492,8 +501,14 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	 *            the hboxVertices to set
 	 */
 	public void setHboxVertices(int[] hboxVertices) {
-	    this.hboxVertices = hboxVertices;
-	}
+	    String s = "";
+	    for(int i = 0; i < hboxVertices.length; i++) {
+		s+=hboxVertices[i]+"";
+		if(i < (hboxVertices.length-1))
+		    s+=",";
+	    }
+	    setHitboxVerticesString(s);
+	}//end setHboxVertices(...)
 
 	/**
 	 * @return the attackDistance
@@ -658,6 +673,14 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	 */
 	public void setBossYellSFXFile(String bossYellSFXFile) {
 	    this.bossYellSFXFile = bossYellSFXFile;
+	}
+
+	public String getHitboxVerticesString() {
+	    return hitboxVerticesString;
+	}
+
+	public void setHitboxVerticesString(String hitboxVerticesString) {
+	    this.hitboxVerticesString = hitboxVerticesString;
 	}
     }// end EnemyDefinition
 

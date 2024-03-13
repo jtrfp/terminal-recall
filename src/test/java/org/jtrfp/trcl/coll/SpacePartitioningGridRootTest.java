@@ -15,13 +15,13 @@ package org.jtrfp.trcl.coll;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -38,7 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.ochafik.util.listenable.Pair;
 
@@ -63,7 +63,7 @@ public class SpacePartitioningGridRootTest {
 	subject.getPackedObjectsDispatcher().addTarget(mockedTarget, true);
 	verify(mockedTarget,never()).add   (any(Pair.class));
 	verify(mockedTarget,never()).addAll(any(Collection.class));
-	verifyZeroInteractions(mockedTarget);
+	verifyNoInteractions(mockedTarget);
 	//subject.activate();
     }
 

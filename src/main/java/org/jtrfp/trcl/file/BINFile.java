@@ -47,11 +47,12 @@ public abstract class BINFile implements ThirdPartyParseable {
 	    prs.littleEndian();
 	    prs.expectBytes(new byte[] { 0x00, 0x00, 0x00, IBinData.ID_MODEL },
 		    FailureBehavior.UNRECOGNIZED_FORMAT);
-
+	    
 	    prs.int4s(prs.property("scale", int.class));
 	    prs.int4s(prs.property("unknown1", int.class));
 	    prs.int4s(prs.property("unknown2", int.class));
 	    prs.int4s(prs.property("numVertices", int.class));
+	    
 	    for (int i = 0; i < getNumVertices(); i++) {
 		prs.subParseProposedClasses(
 			prs.indexedProperty("vertices", Vertex.class, i),
@@ -82,7 +83,7 @@ public abstract class BINFile implements ThirdPartyParseable {
 		    parser.expectBytes(new byte[]{0,0,0,0x1F}, FailureBehavior.UNRECOGNIZED_FORMAT);
 		    parser.int4s(parser.property("zero"       , int.class));
 		    parser.int4u(parser.property("numVertices", long.class));
-		    System.out.println("NumVertices="+getNumVertices()+" zero="+zero);
+		    
 		    for(int i=0; i<getNumVertices(); i++)
 			parser.int4u(parser.indexedProperty("paletteIndices", Long.class, i));
 		}//end describeFormat(...)
@@ -573,6 +574,62 @@ public abstract class BINFile implements ThirdPartyParseable {
 		    this.unknown = unknown;
 		}
 	    }// end Unknown0C
+	    
+	    public static class Unknown02 implements ThirdPartyParseable {
+		private int unknown0, numVertices;
+		private ArrayList<org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertexWithUV> vertices;
+		private int [] unknownTail = new int[20];
+		
+		@Override
+		public void describeFormat(Parser prs) {
+		    prs.littleEndian();
+		    prs.expectBytes(new byte[] {0,0,0,0x02},
+			    FailureBehavior.UNRECOGNIZED_FORMAT);
+		    prs.int4s(prs.property("unknown0", int.class));
+		    prs.int4s(prs.property("numVertices", int.class));
+		    
+		    for (int i = 0; i < getNumVertices(); i++) {
+			prs.subParseProposedClasses(prs.indexedProperty(
+				"vertices", org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertexWithUV.class, i),
+				ClassInclusion
+					.classOf(org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertexWithUV.class));
+		    }//end for(vertices)
+		    for(int i = 0; i < unknownTail.length; i++)
+			prs.int4s(prs.indexedProperty("unknownTail", int.class, i));
+		}
+
+		public int getUnknown0() {
+		    return unknown0;
+		}
+
+		public void setUnknown0(int unknown0) {
+		    this.unknown0 = unknown0;
+		}
+
+		public int getNumVertices() {
+		    return numVertices;
+		}
+
+		public void setNumVertices(int numVertices) {
+		    this.numVertices = numVertices;
+		}
+
+		public ArrayList<org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertexWithUV> getVertices() {
+		    return vertices;
+		}
+
+		public void setVertices(ArrayList<org.jtrfp.trcl.file.BINFile.Model.DataBlock.FaceBlock.FaceBlockVertexWithUV> vertices) {
+		    this.vertices = vertices;
+		}
+
+		public int[] getUnknownTail() {
+		    return unknownTail;
+		}
+
+		public void setUnknownTail(int[] unknownTail) {
+		    this.unknownTail = unknownTail;
+		}
+	    }//end Unknown02
 
 	    public static class Unknown12 implements ThirdPartyParseable {
 		byte[] unknown = new byte[4];
@@ -994,62 +1051,46 @@ public abstract class BINFile implements ThirdPartyParseable {
 
 	    }// end Unknown0
 
-	    public static class VertexNormal implements ThirdPartyParseable {
-		int x, y, z;
+	    public static class VertexNormalsBlock implements ThirdPartyParseable {
+		private int unknown0, numNormals;
+		private ArrayList<Vertex> normals;
 
 		@Override
 		public void describeFormat(Parser prs)
 			throws UnrecognizedFormatException {
 		    prs.expectBytes(new byte[] { 0, 0, 0, 0x03 },
 			    FailureBehavior.UNRECOGNIZED_FORMAT);
-		    prs.int4s(prs.property("x", int.class));
-		    prs.int4s(prs.property("y", int.class));
-		    prs.int4s(prs.property("z", int.class));
+		    prs.int4s(prs.property("unknown0", int.class));
+		    prs.int4s(prs.property("numNormals", int.class));
+		    for(int i = 0; i < getNumNormals(); i++) {
+			prs.subParseProposedClasses(
+				prs.indexedProperty("normals", Vertex.class, i),
+				ClassInclusion.classOf(Vertex.class));
+		    }
 		}
 
-		/**
-		 * @return the x
-		 */
-		public int getX() {
-		    return x;
+		public int getNumNormals() {
+		    return numNormals;
 		}
 
-		/**
-		 * @param x
-		 *            the x to set
-		 */
-		public void setX(int x) {
-		    this.x = x;
+		public void setNumNormals(int numNormals) {
+		    this.numNormals = numNormals;
 		}
 
-		/**
-		 * @return the y
-		 */
-		public int getY() {
-		    return y;
+		public ArrayList<Vertex> getNormals() {
+		    return normals;
 		}
 
-		/**
-		 * @param y
-		 *            the y to set
-		 */
-		public void setY(int y) {
-		    this.y = y;
+		public void setNormals(ArrayList<Vertex> normals) {
+		    this.normals = normals;
 		}
 
-		/**
-		 * @return the z
-		 */
-		public int getZ() {
-		    return z;
+		public int getUnknown0() {
+		    return unknown0;
 		}
 
-		/**
-		 * @param z
-		 *            the z to set
-		 */
-		public void setZ(int z) {
-		    this.z = z;
+		public void setUnknown0(int unknown0) {
+		    this.unknown0 = unknown0;
 		}
 	    }// end VertexNormal
 

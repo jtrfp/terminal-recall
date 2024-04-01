@@ -64,7 +64,7 @@ public class PagedByteBufferContext implements IByteBuffer, Flushable {
 
 	@Override
 	public void run() {
-	    System.out.println("PagedByteBufferContext cleaning action...");
+	    //System.out.println("PagedByteBufferContext cleaning action...");
 	    if(!floatsToSet[0].isEmpty())
 		new RuntimeException("FloatsToSet unflushed following finalization!").printStackTrace();
 	    if(!intsToSet[0].isEmpty())

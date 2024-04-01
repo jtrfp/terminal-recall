@@ -704,7 +704,8 @@ public class ResourceManager{
 		}
 	public NAVFile getNAVData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
 		InputStream is = getInputStreamFromResource("DATA\\"+fileName);
-		NAVFile result = new Parser().readToNewBean(is, NAVFile.class);
+		//NAVFile result = new Parser().readToNewBean(is, NAVFile.class);
+		NAVFile result = new NAVFile(is);
 		is.close();
 		return result;
 		}

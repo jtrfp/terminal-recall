@@ -99,7 +99,65 @@ public enum Weapon {
     DAM("DAM",
 	    "FFF", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
 		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    LegionMissile("LM",//Warning: Speculative!
+	    "LM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    IndependenceMissile("IM",//Warning: Speculative!
+	    "IM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    DoomsdayMine("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    Unknown0("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    Unknown1("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    Unknown2("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    Unknown3("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    Unknown4("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    Unknown5("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    Unknown6("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    Unknown7("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    Unknown8("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    Unknown9("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
+		    4194304, false, false,1000/2),
+    Unknown10("DM",//Warning: Speculative!
+	    "DM", new FlatModelingType("FIRBAL0.RAW","SQGLSR.RAW", new Dimension(80000,
+		    560000)), Integer.MAX_VALUE, 0, false, 7,
 		    4194304, false, false,1000/2);
+    
+    
     private final String       tvDisplayName, f3DisplayName;
     private final int 	       damage, speed, buttonToSelect, firingIntervalMS;
     private final ModelingType modelingType;

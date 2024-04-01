@@ -12,6 +12,8 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.io.FileNotFoundException;
+
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.file.Powerup;
@@ -21,7 +23,10 @@ public class PowerupSystem extends RenderableSpacePartitioningGrid{
     public PowerupSystem(TR tr){
 	super();
 	for(Powerup p:Powerup.values()){
-	    factories[p.ordinal()]=new PowerupFactory(p, this);
+	    try {factories[p.ordinal()]=new PowerupFactory(p, this);}
+	    catch(FileNotFoundException e) {
+		factories[p.ordinal()] = null;//Probably won't be used.
+	    }
 	}//end for(Powerups)
     }//end constructor
     

@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.io.FileNotFoundException;
 import java.lang.ref.WeakReference;
 
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
@@ -23,7 +24,7 @@ public class PowerupFactory{
     private final PowerupObject [] objects = new PowerupObject[POOL_SIZE];
     private int powerupIndex=0;
     //private final TR tr;
-    public PowerupFactory(Powerup type, RenderableSpacePartitioningGrid pGrid){
+    public PowerupFactory(Powerup type, RenderableSpacePartitioningGrid pGrid) throws FileNotFoundException {
 	//this.tr=tr;
 	parentGrid=new WeakReference<RenderableSpacePartitioningGrid>(pGrid);
 	for(int i=0; i<objects.length;i++){

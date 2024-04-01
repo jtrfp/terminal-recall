@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
@@ -40,14 +41,16 @@ public class PUPObjectPlacer implements ObjectPlacer {
 	int pupIndex=0;
 	for (PowerupLocation loc : pupData.getPowerupLocations()) {
 	    locationReporters[pupIndex++].complete();
-	    PowerupObject powerup = new PowerupObject(loc.getType());
-	    final double[] pupPos = powerup.getPosition();
-	    pupPos[0] = TRFactory.legacy2Modern(loc.getZ());
-	    pupPos[1] = (TRFactory.legacy2Modern(loc.getY()) / TRFactory.mapWidth) * 16.
-		    * tr.getWorld().sizeY;
-	    pupPos[2] = TRFactory.legacy2Modern(loc.getX());
-	    powerup.notifyPositionChange();
-	    objs.add(powerup);
+	    try {
+		PowerupObject powerup = new PowerupObject(loc.getType());
+		final double[] pupPos = powerup.getPosition();
+		pupPos[0] = TRFactory.legacy2Modern(loc.getZ());
+		pupPos[1] = (TRFactory.legacy2Modern(loc.getY()) / TRFactory.mapWidth) * 16.
+			* tr.getWorld().sizeY;
+		pupPos[2] = TRFactory.legacy2Modern(loc.getX());
+		powerup.notifyPositionChange();
+		objs.add(powerup);
+	    } catch(FileNotFoundException e) {e.printStackTrace();}
 	}// end for(locations)
 	final RenderableSpacePartitioningGrid target         = getTargetGrid();
 	final Vector3D                        positionOffset = getPositionOffset();

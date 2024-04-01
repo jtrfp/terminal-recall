@@ -46,19 +46,89 @@ public enum Powerup {
     invincibility(null, 0, 0, 0, 1000 * 30, 0, false,
 	    Integer.MAX_VALUE,
 	    "Invincibility", "Invincibility","POWERINV.BIN"), 
-    DAM(Weapon.DAM, 1, 0, 0, 0, 0,
+    DAM(Weapon.DAM, 1, 0, 0, 0, 0,//Also Hellion missile in HB
 	    false, 1,
 		    //TODO: What's the real billboard for this?
 	    "Discrete Annihilation Missile", "FFF","POWERFIR.BIN"), 
     Afterburner(null, 0, 0, 0,
 	    0, 120, false, Integer.MAX_VALUE,
 		    "Afterburner", "Turbo!","POWERZAP.BIN"), //TODO: What's the real billboard for this?
-    PowerCore(null,
+    PowerCore(null,//Also referred to as "message pod"
 	    0, 6554, 0, 0, 0, false, Integer.MAX_VALUE,
 		    "Shield Boost",
 	    "Shield Boost!", "POWERCAN.BIN"), 
-    Random(null, 0, 0, 0, 0, 0, false,
-	    Integer.MAX_VALUE,"???", "???","POWER1.BIN"); // Not for use in TV
+    Random(null, 0, 0, 0, 0, 0, false,//Also used as Scorcher missile in HB?
+	    Integer.MAX_VALUE,"???", "???","POWER1.BIN"), // Not for use in TV
+    LegionMissile(Weapon.LegionMissile, 20, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Legion Missiles",
+	    "Legion Missiles","NULL.BIN"), 
+    IndependenceMissile(Weapon.IndependenceMissile, 20, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Independence Missiles",
+	    "Independence Missiles","NULL.BIN"), 
+    DoomsdayMine(Weapon.DoomsdayMine, 1, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Doomsday Mine",
+	    "Doomsday Mine","NULL.BIN"), 
+    GreenRepairDrone(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Green Repair Drone",
+	    "Green Repair Drone","NULL.BIN"), 
+    BlueRepairDrone(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Blue Repair Drone",
+	    "Blue Repair Drone","NULL.BIN"), 
+    RedRepairDrone(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Red Repair Drone",
+	    "Red Repair Drone","NULL.BIN"), 
+    GreenEnergyCell(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Green Energy Cell",
+	    "Green Energy Cell","NULL.BIN"), 
+    BlueEnergyCell(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Blue Energy Cell",
+	    "Blue Energy Cell","NULL.BIN"), 
+    RedEnergyCell(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Red Energy Cell",
+	    "Red Energy Cell","NULL.BIN"),
+    MessagePod(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Message Pod",
+	    "Message Pod","NULL.BIN"),
+    Unknown0(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown1(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown2(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown3(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown4(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown5(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown6(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown7(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown8(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown9(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown10(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown11(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown0","NULL.BIN"),
+    Unknown12(null, 0, 0, 0,//Warning: Quantity speculative!
+	    0, 0, false, Integer.MAX_VALUE, "Unknown",
+	    "Unknown1","NULL.BIN");
+    
     private final int	   shieldDelta, invisibiltyTimeDeltaMillis,
 	    invincibilityTimeDeltaMillis, afterburnerDelta, weaponSupplyDelta;
     private final boolean  doublesFiringMultiplex;

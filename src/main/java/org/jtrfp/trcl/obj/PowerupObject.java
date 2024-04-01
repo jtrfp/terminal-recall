@@ -12,6 +12,7 @@
  ******************************************************************************/
 package org.jtrfp.trcl.obj;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 
 import org.jtrfp.trcl.beh.Behavior;
@@ -39,11 +40,12 @@ public class PowerupObject extends WorldObject{
 	private final Powerup powerupType;
 	private final SoundTexture powerupSound;
 	private GameShell gameShell;
-	public PowerupObject(Powerup pt){
+	public PowerupObject(Powerup pt) throws FileNotFoundException {
 		super();
 		this.powerupType=pt;
 		final TR tr = getTr();
 		try{setModel(tr.getResourceManager().getBINModel(powerupType.getModel(), tr.getGlobalPaletteVL(), null, null));}
+		catch(FileNotFoundException e) {throw e;}
 		catch(Exception e){e.printStackTrace();}
 		
 		addBehavior(new PowerupBehavior());

@@ -48,8 +48,8 @@ import org.jtrfp.trcl.ext.lvl.LVLFileEnhancementsFactory.LVLFileEnhancements;
 import org.jtrfp.trcl.ext.tr.SoundSystemFactory.SoundSystemFeature;
 import org.jtrfp.trcl.file.LVLFile;
 import org.jtrfp.trcl.file.Location3D;
-import org.jtrfp.trcl.file.NAVFile.NAVSubObject;
-import org.jtrfp.trcl.file.NAVFile.START;
+import org.jtrfp.trcl.file.NAVData;
+import org.jtrfp.trcl.file.NAVData.NAVSubObjectData;
 import org.jtrfp.trcl.file.TDFFile;
 import org.jtrfp.trcl.game.Game;
 import org.jtrfp.trcl.game.TVF3Game;
@@ -131,7 +131,7 @@ public class Mission {
     				navs	= new LinkedList<NAVObjective>();
     private LVLFile 	        lvl;
     private double[] 		playerStartPosition;
-    private List<NAVSubObject> 	navSubObjects;
+    private List<? extends NAVData.NAVSubObjectData>navSubObjects;
     //private double []           playerStartHeading,
     //                            playerStartTop;
     private Game 		game;
@@ -159,7 +159,7 @@ public class Mission {
     private WeakPropertyChangeListener weakRunStateListener; // HARD REFERENCE; DO NOT REMOVE.
     private String lvlFileName;
     private List<DEFObject> defObjectList;
-    private Map<NAVObjective,NAVSubObject> navMap = new HashMap<>();
+    private Map<NAVObjective,NAVData.NAVSubObjectData> navMap = new HashMap<>();
     private PlayerSaveState playerSaveState;
     //private GLExecutor<?> glExecutor;
     //private Vector3D sunVector;
@@ -409,7 +409,7 @@ public class Mission {
 		//                                                             .ordinal()].generateSubReporters(navSubObjects.size());
 		final Reporter reporter = Features.get(getTr(), Reporter.class);
 		for (int i = 0; i < navSubObjects.size(); i++) {
-		    final NAVSubObject obj = navSubObjects.get(i);
+		    final NAVData.NAVSubObjectData obj = navSubObjects.get(i);
 		    System.out.println("Parsing NAV Sub-Object "+obj);
 		    f.create(reporter, obj, navs, navMap);
 		    //navProgress[i].complete();
@@ -427,7 +427,7 @@ public class Mission {
 		setPlayerSaveState(playerSaveState);
 		playerSaveState.readFrom(player);
 		
-		START startNav = (START) getNavSubObjects().get(0);
+		NAVData.StartingPoint startNav = (NAVData.StartingPoint) getNavSubObjects().get(0);
 		final ObjectDirection od = new ObjectDirection(startNav.getRoll(),
 			    startNav.getPitch(), startNav.getYaw());
 		Location3D l3d = startNav.getLocationOnMap();
@@ -655,7 +655,7 @@ public class Mission {
     /**
      * @return the navSubObjects
      */
-    public List<NAVSubObject> getNavSubObjects() {
+    public List<? extends NAVSubObjectData> getNavSubObjects() {
 	return navSubObjects;
     }
 
@@ -663,9 +663,9 @@ public class Mission {
      * @param navSubObjects
      *            the navSubObjects to set
      */
-    public void setNavSubObjects(List<NAVSubObject> navSubObjects) {
+    public void setNavSubObjects(List<? extends NAVSubObjectData> navSubObjects) {
 	if( navSubObjects != null)
-	    this.navSubObjects = new ArrayList<NAVSubObject>(navSubObjects);
+	    this.navSubObjects = new ArrayList<>(navSubObjects);
 	else
 	    navSubObjects = null;
 	navs.clear();//Ensure navs get repopulated.

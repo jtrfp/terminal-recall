@@ -31,7 +31,7 @@ public class AbstractTriplet implements ThirdPartyParseable {
     public void describeFormat(Parser prs) throws UnrecognizedFormatException {
 	prs.stringEndingWith(",", prs.property("x", Integer.class), false);
 	prs.stringEndingWith(",", prs.property("y", Integer.class), false);
-	prs.stringEndingWith(new String[]{"\r\n","\n"}, prs.property("z", Integer.class), false);
+	prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("z", Integer.class), false);
     }
 
     public static class EndingWithComma extends AbstractTriplet {

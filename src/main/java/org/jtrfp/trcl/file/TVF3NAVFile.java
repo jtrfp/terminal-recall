@@ -90,7 +90,7 @@ public class TVF3NAVFile extends SelfParsingFile implements NAVData {
 	public void setPriority(int newPriority) {}
 	public String getProximitySoundFile() {return null;}
 	public void setProximitySoundFile(String newPriority) {}
-	public String getCompletionTextFile() {return null;}
+	public String getCompletionText() {return null;}
 	public void setCompletionTextFile(String newPriority) {}
 	public String getCompletionSoundFile() {return null;}
 	public void setCompletionSoundFile(String newPriority) {}

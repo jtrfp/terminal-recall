@@ -80,8 +80,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	String bossFireSFXFile;
 	String bossYellSFXFile;
 	// = cannonDamage, laserDamage, missileDamage
-	private Integer cannonDamage;
-	private int laserDamage, missileDamage;
+	private Integer laserDamage, missileDamage, cannonDamage;
 	private Boolean friendly;
 	private String escapeSFX, destroySFX;
 	private Integer pathToFollow;
@@ -205,7 +204,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	    }
 	    
 	    try {
-		if(prs.parseMode == ParseMode.WRITE && getCannonDamage() == null)
+		if(prs.parseMode == ParseMode.WRITE && (getCannonDamage() == null || getLaserDamage() == null || getMissileDamage() == null))
 		    throw new UnrecognizedFormatException();//Skip if not applicable on write
 		prs.expectString("= cannonDamage, laserDamage, missileDamage\r\n",
 			FailureBehavior.UNRECOGNIZED_FORMAT);
@@ -828,22 +827,6 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	    this.cannonDamage = cannonDamage;
 	}
 
-	public int getLaserDamage() {
-	    return laserDamage;
-	}
-
-	public void setLaserDamage(int laserDamage) {
-	    this.laserDamage = laserDamage;
-	}
-
-	public int getMissileDamage() {
-	    return missileDamage;
-	}
-
-	public void setMissileDamage(int missileDamage) {
-	    this.missileDamage = missileDamage;
-	}
-
 	public Boolean isFriendly() {
 	    return friendly;
 	}
@@ -874,6 +857,34 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 
 	public void setPathToFollow(Integer pathToFollow) {
 	    this.pathToFollow = pathToFollow;
+	}
+
+	public Integer getLaserDamage() {
+	    return laserDamage;
+	}
+
+	public void setLaserDamage(Integer laserDamage) {
+	    this.laserDamage = laserDamage;
+	}
+
+	public Integer getMissileDamage() {
+	    return missileDamage;
+	}
+
+	public void setMissileDamage(Integer missileDamage) {
+	    this.missileDamage = missileDamage;
+	}
+
+	public Boolean getFriendly() {
+	    return friendly;
+	}
+
+	public void setFriendly(Boolean friendly) {
+	    this.friendly = friendly;
+	}
+
+	public void setCannonDamage(Integer cannonDamage) {
+	    this.cannonDamage = cannonDamage;
 	}
     }// end EnemyDefinition
 

@@ -33,6 +33,7 @@ public class TDFFile extends SelfParsingFile {
 
     @Override
     public void describeFormat(Parser prs) throws UnrecognizedFormatException {
+	prs.ignoreEOF(true);//numTunnels will default to zero and we'll finish safely.
 	prs.stringEndingWith(TRParsers.LINE_DELIMITERS, prs.property("numTunnels", int.class),
 		false);
 	for (int i = 0; i < getNumTunnels(); i++) {

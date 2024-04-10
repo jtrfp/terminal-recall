@@ -27,6 +27,7 @@ import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.SelfParsingFile;
 import org.jtrfp.jfdt.ThirdPartyParseable;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
+import org.jtrfp.jfdt.Parser.ParseMode;
 
 public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
     public DEFFile(InputStream is) throws IOException, IllegalAccessException {
@@ -78,6 +79,12 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	// %SFX
 	String bossFireSFXFile;
 	String bossYellSFXFile;
+	// = cannonDamage, laserDamage, missileDamage
+	private Integer cannonDamage;
+	private int laserDamage, missileDamage;
+	private Boolean friendly;
+	private String escapeSFX, destroySFX;
+	private Integer pathToFollow;
 
 	@Override
 	public void describeFormat(Parser prs)
@@ -123,7 +130,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 		prs.expectString(";NewHit\r\n",
 			FailureBehavior.UNRECOGNIZED_FORMAT);
 		prs.stringEndingWith(",",
-			prs.property("numNewHBoxes", int.class), false);
+			prs.property("numNewHBoxes", int.class), false);//This is a kludge to handle varying numbers of hitboxes
 		prs.stringEndingWith("\r\n", prs.property("hitboxVerticesString", String.class), false);
 		/*
 		for (int i = 0; i < 15; i++) {
@@ -136,7 +143,7 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 			false);// last one, ending in newline.
 		*/
 	    } catch (UnrecognizedFormatException e) {
-		System.out.println("NewHit not given for this def");
+		//System.out.println("NewHit not given for this def");
 	    }
 
 	    try {
@@ -151,12 +158,12 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			prs.property("unknown", int.class), false);
 	    } catch (UnrecognizedFormatException e) {
-		System.out.println("NewAttackRet not given for this def");
+		//System.out.println("NewAttackRet not given for this def");
 	    }
 
 	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("description", String.class), false);
-
+	    
 	    try {
 		prs.expectString("#New2ndweapon\r\n",
 			FailureBehavior.UNRECOGNIZED_FORMAT);
@@ -169,10 +176,13 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			prs.property("fireVelocity", int.class), false);
 	    } catch (UnrecognizedFormatException e) {
-		System.out.println("2nd Weapon not given for this def");
+		//System.out.println("2nd Weapon not given for this def");
 	    }
+	    
+	    prs.ignoreEOF = true;
+	    
 	    try {
-		prs.ignoreEOF = true;
+		
 		prs.expectString("%SFX\r\n",
 			FailureBehavior.UNRECOGNIZED_FORMAT);
 		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
@@ -180,7 +190,57 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			prs.property("bossYellSFXFile", String.class), false);
 	    } catch (UnrecognizedFormatException e) {
-		System.out.println("SFX not given for this def.");
+		//System.out.println("%SFX not given for this def.");
+	    }
+	    
+	    try {
+		if(prs.parseMode == ParseMode.WRITE && getPathToFollow() == null)
+		    throw new UnrecognizedFormatException();//Skip if not applicable on write
+		prs.expectString(": Path to follow\r\n",
+			FailureBehavior.UNRECOGNIZED_FORMAT);
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
+			prs.property("pathToFollow", int.class), false);
+	    } catch (UnrecognizedFormatException e) {
+		//System.out.println(": Path to follow not given for this def.");
+	    }
+	    
+	    try {
+		if(prs.parseMode == ParseMode.WRITE && getCannonDamage() == null)
+		    throw new UnrecognizedFormatException();//Skip if not applicable on write
+		prs.expectString("= cannonDamage, laserDamage, missileDamage\r\n",
+			FailureBehavior.UNRECOGNIZED_FORMAT);
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
+			prs.property("cannonDamage", int.class), false);
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
+			prs.property("laserDamage", int.class), false);
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
+			prs.property("missileDamage", int.class), false);
+	    } catch (UnrecognizedFormatException e) {
+		//System.out.println("{cannonDamage, laserDamage, missileDamage} not given for this def.");
+	    }
+	    
+	    try {
+		if(prs.parseMode == ParseMode.WRITE && isFriendly() == null)
+		    throw new UnrecognizedFormatException();//Skip if not applicable on write
+		prs.expectString("@ Friendly flag\r\n",
+			FailureBehavior.UNRECOGNIZED_FORMAT);
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
+			prs.property("friendly", boolean.class), false);
+	    } catch (UnrecognizedFormatException e) {
+		//System.out.println("SFX not given for this def.");
+	    }
+	    
+	    try {
+		if(prs.parseMode == ParseMode.WRITE && getEscapeSFX() == null && getDestroySFX() == null)
+		    throw new UnrecognizedFormatException();//Skip if not applicable on write
+		prs.expectString("{ Escape and destroy sound files\r\n",
+			FailureBehavior.UNRECOGNIZED_FORMAT);
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
+			prs.property("escapeSFX", String.class), false);
+		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
+			prs.property("destroySFX", String.class), false);
+	    } catch (UnrecognizedFormatException e) {
+		//System.out.println("Escape and destroy sound files not given for this def.");
 	    }
 	}// end describeFormat()
 
@@ -189,16 +249,82 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	}
 
 	public static enum EnemyLogic {
-	    groundStatic, groundTargeting, flyingDumb, groundTargetingDumb, flyingSmart, bankSpinDrill, sphereBoss, flyingAttackRetreatSmart, splitShipSmart, groundStaticRuin, targetHeadingSmart, targetPitchSmart, coreBossSmart, cityBossSmart, staticFiringSmart, sittingDuck, tunnelAttack, takeoffAndEscape, fallingAsteroid, cNome, cNomeLegs, cNomeFactory, geigerBoss, volcanoBoss, volcano, missile, bob, alienBoss, canyonBoss1, canyonBoss2, lavaMan, arcticBoss, helicopter, tree, ceilingStatic, bobAndAttack, forwardDrive, fallingStalag, attackRetreatBelowSky, attackRetreatAboveSky, bobAboveSky, factory, shootOnThrustFrame;// Shoot
-																																																																														// on
-																																																																														// frame
-																																																																														// defined
-																																																																														// by
-																																																																														// thrust,
-																																																																														// smart
-																																																																														// target,
-																																																																														// yaw-only
-																																																																														// rotate
+	    groundStatic, 
+	    groundTargeting, 
+	    flyingDumb, 
+	    groundTargetingDumb, 
+	    flyingSmart, 
+	    bankSpinDrill, 
+	    sphereBoss, 
+	    flyingAttackRetreatSmart, 
+	    splitShipSmart, 
+	    groundStaticRuin, 
+	    targetHeadingSmart, 
+	    targetPitchSmart, 
+	    coreBossSmart, 
+	    cityBossSmart, 
+	    staticFiringSmart, 
+	    sittingDuck, 
+	    tunnelAttack, 
+	    takeoffAndEscape, 
+	    fallingAsteroid, 
+	    cNome, 
+	    cNomeLegs, 
+	    cNomeFactory, 
+	    geigerBoss, 
+	    volcanoBoss, 
+	    volcano, 
+	    missile, 
+	    bob, 
+	    alienBoss, 
+	    canyonBoss1, 
+	    canyonBoss2, 
+	    lavaMan, 
+	    arcticBoss, 
+	    helicopter, 
+	    tree, 
+	    ceilingStatic, 
+	    bobAndAttack, 
+	    forwardDrive, 
+	    fallingStalag, 
+	    attackRetreatBelowSky, 
+	    attackRetreatAboveSky, 
+	    bobAboveSky, 
+	    factory, 
+	    shootOnThrustFrame,
+	    unknown0,
+	    unknown1,
+	    unknown2,
+	    unknown3,
+	    unknown4,
+	    unknown5,
+	    unknown6,
+	    unknown7,
+	    unknown8,
+	    unknown9,
+	    unknown10,
+	    unknown11,
+	    unknown12,
+	    unknown13,
+	    unknown14,
+	    unknown15,
+	    unknown16,
+	    unknown17,
+	    unknown18,
+	    unknown19,
+	    unknown20,
+	    unknown21,
+	    unknown22;
+	    // Shoot
+	    // on
+	    // frame
+	    // defined
+	    // by
+	    // thrust,
+	    // smart
+	    // target,
+	    // yaw-only
+	    // rotate
 	}// end EnemyLogic
 
 	/**
@@ -493,7 +619,10 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 	    final String[] ss = s.split("\\s*,\\s*");
 	    final String[] result = new String[this.numHboxVertcies];
 	    System.arraycopy(ss, 0, result, 0, this.numHboxVertcies);
-	    return Stream.of(result).map(str->Integer.parseInt(str)).mapToInt(x->x).toArray();
+	    int [] subResult = Stream.of(result).map(str->Integer.parseInt(str)).mapToInt(x->x).toArray();
+	    final int [] padded = new int[16];
+	    System.arraycopy(subResult, 0, padded, 0, subResult.length);
+	    return padded;
 	}
 
 	/**
@@ -681,6 +810,70 @@ public class DEFFile extends SelfParsingFile implements ThirdPartyParseable {
 
 	public void setHitboxVerticesString(String hitboxVerticesString) {
 	    this.hitboxVerticesString = hitboxVerticesString;
+	}
+
+	public int getNumHboxVertcies() {
+	    return numHboxVertcies;
+	}
+
+	public void setNumHboxVertcies(int numHboxVertcies) {
+	    this.numHboxVertcies = numHboxVertcies;
+	}
+
+	public Integer getCannonDamage() {
+	    return cannonDamage;
+	}
+
+	public void setCannonDamage(int cannonDamage) {
+	    this.cannonDamage = cannonDamage;
+	}
+
+	public int getLaserDamage() {
+	    return laserDamage;
+	}
+
+	public void setLaserDamage(int laserDamage) {
+	    this.laserDamage = laserDamage;
+	}
+
+	public int getMissileDamage() {
+	    return missileDamage;
+	}
+
+	public void setMissileDamage(int missileDamage) {
+	    this.missileDamage = missileDamage;
+	}
+
+	public Boolean isFriendly() {
+	    return friendly;
+	}
+
+	public void setFriendly(boolean friendly) {
+	    this.friendly = friendly;
+	}
+
+	public String getEscapeSFX() {
+	    return escapeSFX;
+	}
+
+	public void setEscapeSFX(String escapeSFX) {
+	    this.escapeSFX = escapeSFX;
+	}
+
+	public String getDestroySFX() {
+	    return destroySFX;
+	}
+
+	public void setDestroySFX(String destroySFX) {
+	    this.destroySFX = destroySFX;
+	}
+
+	public Integer getPathToFollow() {
+	    return pathToFollow;
+	}
+
+	public void setPathToFollow(Integer pathToFollow) {
+	    this.pathToFollow = pathToFollow;
 	}
     }// end EnemyDefinition
 

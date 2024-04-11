@@ -40,32 +40,27 @@ public class HellbenderNAVFile extends SelfParsingFile implements NAVData {
 	prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		prs.property("numNavigationPoints", int.class), false);
 	for (int i = 0; i < getNumNavigationPoints(); i++) {
-	    System.out.println("nav "+i);
 	    prs.subParseProposedClasses(
 		    prs.indexedProperty("nativeNavObjects", NAVSubObject.class, i),
 		    ClassInclusion.nestedClassesOf(HellbenderNAVFile.class));
-	    System.out.println("Start divider "+i);
 	    prs.expectString("-------------------------------------------------\r\n", FailureBehavior.UNRECOGNIZED_FORMAT);
-	    System.out.println("End divider "+i); 
 	}
     }// end describeFormat()
 
     public static abstract class NAVSubObject implements ThirdPartyParseable, NAVSubObjectData {
 	Location3D locationOnMap;
 	int priority, time;
-	String completionSoundFile, completionTextFile, proximitySoundFile;
+	String completionSoundFile, completionText, proximitySoundFile;
 	String description;
 	
 	@Override
 	public void describeFormat(Parser prs)
 		throws UnrecognizedFormatException {
-	    //System.out.println("ExpectString: "+getNAVNumber());
 	    prs.expectString(getNAVNumber()+"\r\n", FailureBehavior.UNRECOGNIZED_FORMAT);
-	    System.out.println("NAV No. "+getNAVNumber());
 	    prs.subParseProposedClasses(
 		    prs.property("locationOnMap", Location3D.class),
 		    ClassInclusion.classOf(Location3D.class));
-	    System.out.println("locationOnMap passed.");
+	    
 	    try {//Hellbender stuff //TODO: Consider skipping writing this if not applicable
 		prs.expectString("!priority,time\r\n", FailureBehavior.UNRECOGNIZED_FORMAT);
 		prs.stringCSVEndingWith("\r\n", int.class, false, "priority","time");
@@ -76,7 +71,7 @@ public class HellbenderNAVFile extends SelfParsingFile implements NAVData {
 		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 			    prs.property("completionSoundFile", String.class), false);
 		prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
-			    prs.property("completionTextFile", String.class), false);
+			    prs.property("completionText", String.class), false);
 	    }catch(UnrecognizedFormatException e) {}
 	    
 	    try {//Hellbender stuff //TODO: Consider skipping writing this if not applicable
@@ -87,7 +82,6 @@ public class HellbenderNAVFile extends SelfParsingFile implements NAVData {
 	    
 	    prs.stringEndingWith(TRParsers.LINE_DELIMITERS,
 		    prs.property("description", String.class), false);
-	    System.out.println("Description: "+getDescription());
 	}//end describeFormat(...)
 	
 	protected abstract int getNAVNumber();
@@ -143,12 +137,12 @@ public class HellbenderNAVFile extends SelfParsingFile implements NAVData {
 	    this.proximitySoundFile = proximitySoundFile;
 	}
 
-	public String getCompletionTextFile() {
-	    return completionTextFile;
+	public String getCompletionText() {
+	    return completionText;
 	}
 
-	public void setCompletionTextFile(String completionTextFile) {
-	    this.completionTextFile = completionTextFile;
+	public void setCompletionText(String completionText) {
+	    this.completionText = completionText;
 	}
 
 	public int getPriority() {
@@ -295,10 +289,8 @@ public class HellbenderNAVFile extends SelfParsingFile implements NAVData {
 	public void describeFormat(Parser prs)
 		throws UnrecognizedFormatException {
 	    super.describeFormat(prs);
-	    System.out.println("START pre- pitch roll yaw");
 	    prs.stringCSVEndingWith("\r\n", int.class, false, "pitch", "roll",
 		    "yaw");
-	    System.out.println("pitch="+getPitch()+" roll="+getRoll()+" yaw="+getYaw());
 	}
 
 	/**
@@ -675,6 +667,7 @@ public class HellbenderNAVFile extends SelfParsingFile implements NAVData {
 	this.navObjects = navObjects;
     }
     
+    @SuppressWarnings("unchecked")
     public ArrayList<NAVSubObject> getNativeNavObjects() {
 	return (ArrayList<NAVSubObject>) this.navObjects;
     }

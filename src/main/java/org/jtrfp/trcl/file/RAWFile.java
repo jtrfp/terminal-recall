@@ -17,6 +17,7 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.SoftReference;
 
 import org.jtrfp.jfdt.Parser;
 import org.jtrfp.jfdt.SelfParsingFile;
@@ -25,7 +26,7 @@ import org.jtrfp.trcl.SpecialRAWDimensions;
 
 public class RAWFile extends SelfParsingFile {
     byte[] 			rawBytes;
-    private BufferedImage[] 	segImg;
+    private SoftReference<BufferedImage[]>segImg = new SoftReference<>(null);
     private double 		scaleWidth = 1, scaleHeight = 1;
     private Dimension 		dims;
     private int 		segWidth, segHeight, numSegs = -1;
@@ -80,11 +81,12 @@ public class RAWFile extends SelfParsingFile {
 	if (palette == null)
 	    throw new RuntimeException(
 		    "Palette property must be set before extracting Image.");
-	if (segImg == null) {
-	    System.out.println("Raw len: " + getRawBytes().length);
+	BufferedImage [] segments = segImg.get();
+	if (segments == null) {
+	    //System.out.println("Raw len: " + getRawBytes().length);
 	    dims = SpecialRAWDimensions
 		    .getSpecialDimensions(getRawBytes().length);
-	    System.out.println("Special dims: " + dims);
+	    //System.out.println("Special dims: " + dims);
 	    int lesserDim, greaterDim;
 	    if (dims.getHeight() > dims.getWidth()) {
 		dir = SegmentDirection.VERTICAL;
@@ -95,35 +97,35 @@ public class RAWFile extends SelfParsingFile {
 		lesserDim = (int) dims.getHeight();
 		greaterDim = (int) dims.getWidth();
 	    }
-	    System.out.println("Raw dims: "+dims.getWidth()+"x"+dims.getHeight());
+	    //System.out.println("Raw dims: "+dims.getWidth()+"x"+dims.getHeight());
 	    int newLDim = lesserDim, newGDim = greaterDim;
 	    // If non-square
 	    if (lesserDim != greaterDim) {
-		System.out.println("Detected as non-square.");
+		//System.out.println("Detected as non-square.");
 		if (!SpecialRAWDimensions.isPowerOfTwo(lesserDim)) {
 		    newLDim = nextPowerOfTwo(lesserDim);
-		    System.out.println("Lesser dim is non-power-of-two. lesserDim="+lesserDim+" newLDim="+newLDim);
+		    //System.out.println("Lesser dim is non-power-of-two. lesserDim="+lesserDim+" newLDim="+newLDim);
 		} else {
-		    System.out.println("Lesser dim is power-of-two.");
+		    //System.out.println("Lesser dim is power-of-two.");
 		}
-		System.out.println("Before nextMultiple, greaterDim="+greaterDim+" newLDim="+newLDim);
+		//System.out.println("Before nextMultiple, greaterDim="+greaterDim+" newLDim="+newLDim);
 		newGDim = nextMultiple(greaterDim, newLDim);
-		System.out.println("After nextMultiple, greaterDim="+newGDim);
+		//System.out.println("After nextMultiple, greaterDim="+newGDim);
 	    }// end if(non-square)
 	    else {// Square, make sure they are a power-of-two
-		System.out.println("Detected as square.");
+		//System.out.println("Detected as square.");
 		if (!SpecialRAWDimensions.isPowerOfTwo(lesserDim)) {
 		    newGDim = nextPowerOfTwo(greaterDim);
 		    newLDim = nextPowerOfTwo(lesserDim);
-		    System.out.println("Non-power-of-two square");
+		    //System.out.println("Non-power-of-two square");
 		} else {
-		    System.out.println("Power-of-two square.");
+		    //System.out.println("Power-of-two square.");
 		}
 	    }// end if(square)
-	    System.out.println("Before upscale newGDim="+newGDim+" newLDim="+newLDim);
+	    //System.out.println("Before upscale newGDim="+newGDim+" newLDim="+newLDim);
 	    newGDim *= Math.pow(2, upScalePowerOfTwo);
 	    newLDim *= Math.pow(2, upScalePowerOfTwo);
-	    System.out.println("After upscale newGDim="+newGDim+" newLDim="+newLDim);
+	    //System.out.println("After upscale newGDim="+newGDim+" newLDim="+newLDim);
 	    int newWidth = 0, newHeight = 0;
 	    if (dir == SegmentDirection.VERTICAL) {
 		newWidth = newLDim;
@@ -134,23 +136,24 @@ public class RAWFile extends SelfParsingFile {
 	    }// Horizontal
 	    scaleWidth = (double) newWidth / dims.getWidth();
 	    scaleHeight = (double) newHeight / dims.getHeight();
-	    System.out.println("newWidth=" + newWidth + " newHeight="
-		    + newHeight);
-	    System.out.println("scaleWidth=" + scaleWidth + " scaleHeight="
-		    + scaleHeight);
+	    //System.out.println("newWidth=" + newWidth + " newHeight="
+		//    + newHeight);
+	    //System.out.println("scaleWidth=" + scaleWidth + " scaleHeight="
+		//    + scaleHeight);
 	    // Break into segments
 	    numSegs = newGDim / newLDim;
 	    // Square so height and width are the same.
 	    segHeight = newLDim;
 	    segWidth = newLDim;
-	    System.out.println("Segwidth=" + segWidth + " segHeight="
-		    + segHeight);
-	    segImg = new BufferedImage[numSegs];
+	    //System.out.println("Segwidth=" + segWidth + " segHeight="
+	//	    + segHeight);
+	    segments = new BufferedImage[numSegs];
+	    segImg = new SoftReference<>(segments);
 	    for (int seg = 0; seg < numSegs; seg++) {
 		BufferedImage segBuf = new BufferedImage(segWidth, segHeight,
 			BufferedImage.TYPE_INT_ARGB);
 		// System.out.println("Created new seg buffer of size "+segWidth+"x"+segHeight);
-		segImg[seg] = segBuf;
+		segments[seg] = segBuf;
 		// Generate the bitmap
 		for (int y = 0; y < segHeight; y++) {
 		    for (int x = 0; x < segWidth; x++) {
@@ -160,8 +163,8 @@ public class RAWFile extends SelfParsingFile {
 		}// end for(y)
 	    }// end (create rgb888)
 	}// end if(segImg==null)
-	System.out.println("Num segs="+numSegs);
-	return segImg;
+	//System.out.println("Num segs="+numSegs);
+	return segments;
     }
 
     private int nextMultiple(int originalValue, int multiplicand) {

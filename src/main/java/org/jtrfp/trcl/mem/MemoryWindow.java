@@ -39,16 +39,16 @@ public abstract class MemoryWindow {
     private int minFreeDelayMillis = 100, maxFreeDelayMillis = 500;
     private volatile long bulkFreeDeadline;
     private boolean isContext = false;
-    
+
     static class MemoryWindowFreeingService extends Thread {
 	private final Queue<MemoryWindow> stale = new ArrayDeque<MemoryWindow>();
 	private final ArrayList<Integer>  freeLaterBuffer = new ArrayList<Integer>();
 	private int loopTally = 0;
-	
+
 	MemoryWindowFreeingService(){
 	    super("MemoryWindowFreeingService");
 	}//end constructor
-	
+
 	@Override
 	public void run(){
 	    while(true){
@@ -72,7 +72,7 @@ public abstract class MemoryWindow {
 		}
 		loopTally++;
 		if(loopTally % 32 == 0)//Don't overload the console
-		 System.out.println("MemoryWindow.MemoryWindowFreeingService freeing "+freeLaterBuffer.size()+" elements.");
+		    System.out.println("MemoryWindow.MemoryWindowFreeingService freeing "+freeLaterBuffer.size()+" elements.");
 		nextWindowToFree.getIndexPool().free(freeLaterBuffer);
 		freeLaterBuffer.clear();
 	    }//end while(true)
@@ -83,11 +83,11 @@ public abstract class MemoryWindow {
 		boolean wasEmpty = stale.isEmpty();
 		stale.add(memoryWindow);
 		if(wasEmpty)
-		 stale.notifyAll();
+		    stale.notifyAll();
 	    }
 	}//end notifyStale()
     }//end MemoryWindowFreeingService
-    
+
     protected final void initFields(){
 	int byteOffset = 0;
 	for (Field f : getClass().getFields()) {
@@ -104,7 +104,7 @@ public abstract class MemoryWindow {
 	}// end for(fields)
 	objectSizeInBytes = byteOffset;
     }//end initFields()
-    
+
     protected final void init(GPU gpu, String debugName) {
 	this.debugName = debugName;
 	initFields();
@@ -118,30 +118,30 @@ public abstract class MemoryWindow {
 		// Grow by one page
 		final int newSizeInObjects = previousMaxCapacity
 			+ (int)Math.ceil((double)PagedByteBuffer.PAGE_SIZE_BYTES
-			/ (double)getObjectSizeInBytes());
+				/ (double)getObjectSizeInBytes());
 		getNoncontextualBuffer().resize(newSizeInObjects * getObjectSizeInBytes());
 		if(MemoryWindow.this.reporter!=null)
-		 MemoryWindow.this.reporter.report(
-			"org.jtrfp.trcl.mem.MemoryWindow."
-				+ MemoryWindow.this.debugName
-				+ ".sizeInObjects", newSizeInObjects+"");
+		    MemoryWindow.this.reporter.report(
+			    "org.jtrfp.trcl.mem.MemoryWindow."
+				    + MemoryWindow.this.debugName
+				    + ".sizeInObjects", newSizeInObjects+"");
 
 		for (int p = 0; p < MemoryWindow.this.numPages(); p++) {
 		    if(MemoryWindow.this.reporter!=null)
-		     MemoryWindow.this.reporter
-			    .report("org.jtrfp.trcl.mem.MemoryWindow."
-				    + MemoryWindow.this.debugName + ".page" + p,
-				    String.format(
-					    "%08x",
-					    MemoryWindow.this
-						    .logicalPage2PhysicalPage(p)
-						    * PagedByteBuffer.PAGE_SIZE_BYTES));
+			MemoryWindow.this.reporter
+			.report("org.jtrfp.trcl.mem.MemoryWindow."
+				+ MemoryWindow.this.debugName + ".page" + p,
+				String.format(
+					"%08x",
+					MemoryWindow.this
+					.logicalPage2PhysicalPage(p)
+					* PagedByteBuffer.PAGE_SIZE_BYTES));
 		}
 		if(MemoryWindow.this.reporter!=null)
-		 MemoryWindow.this.reporter.report(
-			"org.jtrfp.trcl.mem.MemoryWindow."
-				+ MemoryWindow.this.debugName
-				+ ".sizeInObjects", newSizeInObjects+"");
+		    MemoryWindow.this.reporter.report(
+			    "org.jtrfp.trcl.mem.MemoryWindow."
+				    + MemoryWindow.this.debugName
+				    + ".sizeInObjects", newSizeInObjects+"");
 		return newSizeInObjects;
 	    }//end grow()
 
@@ -162,35 +162,41 @@ public abstract class MemoryWindow {
 	buffer.resize(getObjectSizeInBytes() * getNumObjects());
 	for (int p = 0; p < numPages(); p++) {
 	    if(MemoryWindow.this.reporter!=null)
-	     MemoryWindow.this.reporter.report(
-		    "org.jtrfp.trcl.mem.MemoryWindow."
-			    + MemoryWindow.this.debugName + ".page" + p,
-		    String.format("%08x",
-			    MemoryWindow.this.logicalPage2PhysicalPage(p)
-				    * PagedByteBuffer.PAGE_SIZE_BYTES));
+		MemoryWindow.this.reporter.report(
+			"org.jtrfp.trcl.mem.MemoryWindow."
+				+ MemoryWindow.this.debugName + ".page" + p,
+				String.format("%08x",
+					MemoryWindow.this.logicalPage2PhysicalPage(p)
+					* PagedByteBuffer.PAGE_SIZE_BYTES));
 	}//end init()
-	
+
     }// end init()
-    
+
     public final int create() {
-	return getIndexPool().pop();
+	synchronized(MemoryWindow.class) {
+	    return getIndexPool().pop();
+	}//end sync
     }//end create()
-    
+
     public final void create(Collection<Integer> dest, int count){
-	getIndexPool().pop(dest, count);
+	synchronized(MemoryWindow.class) {
+	    getIndexPool().pop(dest, count);
+	}//end sync
     }//end create(...)
-    
+
     public final int free(int objectIDToFree){
-	return getIndexPool().free(objectIDToFree);
+	synchronized(MemoryWindow.class) {
+	    return getIndexPool().free(objectIDToFree);
+	}//end sync
     }//end free(...)
-    
+
     public final void freeLater(int objectIDToFree){
 	synchronized(freeLater){
 	    kickFreeLaterListForward();
 	    freeLater.add(objectIDToFree);
 	}//end sync(...)
     }//end freeLater(...)
-    
+
     public final void freeLater(Collection<Integer> objectIdsToFree){
 	synchronized(freeLater){
 	    kickFreeLaterListForward();
@@ -206,9 +212,11 @@ public abstract class MemoryWindow {
 	}else
 	    bulkFreeDeadline = now + this.getMinFreeDelayMillis();
     }//end kickFreeLaterListForward()
-    
+
     public final void free(Collection<Integer> objectIdsToFree){
-	getIndexPool().free(objectIdsToFree);
+	synchronized(MemoryWindow.class) {
+	    getIndexPool().free(objectIdsToFree);
+	}//end sync
     }
 
     public final int getNumObjects() {
@@ -250,12 +258,12 @@ public abstract class MemoryWindow {
     }// end Property
 
     public static final class IntVariable extends
-	    Variable<Integer, IntVariable> {
+    Variable<Integer, IntVariable> {
 	@Override
 	public IntVariable set(int objectIndex, Integer value) {
 	    getParent().getContextualBuffer().putInt(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
-			    * getParent().getObjectSizeInBytes(), value);
+		    * getParent().getObjectSizeInBytes(), value);
 	    return this;
 	}
 
@@ -263,7 +271,7 @@ public abstract class MemoryWindow {
 	public Integer get(int objectIndex) {
 	    return getParent().getContextualBuffer().getInt(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
-			    * getParent().getObjectSizeInBytes());
+		    * getParent().getObjectSizeInBytes());
 	}
 
 	@Override
@@ -279,7 +287,7 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().put(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
-			    * parent.getObjectSizeInBytes(), value);
+		    * parent.getObjectSizeInBytes(), value);
 	    return this;
 	}
 
@@ -287,7 +295,7 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().put(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
-			    * parent.getObjectSizeInBytes(), value);
+		    * parent.getObjectSizeInBytes(), value);
 	    return this;
 	}
 
@@ -296,7 +304,7 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    return parent.getContextualBuffer().get(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
-			    * parent.getObjectSizeInBytes());
+		    * parent.getObjectSizeInBytes());
 	}
 
 	@Override
@@ -306,14 +314,14 @@ public abstract class MemoryWindow {
     }// end ByteVariable
 
     public static final class ShortVariable extends
-	    Variable<Short, ShortVariable> {
+    Variable<Short, ShortVariable> {
 
 	@Override
 	public ShortVariable set(int objectIndex, Short value) {
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().putShort(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
-			    * parent.getObjectSizeInBytes(), value);
+		    * parent.getObjectSizeInBytes(), value);
 	    return this;
 	}
 
@@ -321,7 +329,7 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().putShort(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
-			    * parent.getObjectSizeInBytes(), value);
+		    * parent.getObjectSizeInBytes(), value);
 	    return this;
 	}
 
@@ -330,7 +338,7 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    return parent.getContextualBuffer().getShort(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
-			    * parent.getObjectSizeInBytes());
+		    * parent.getObjectSizeInBytes());
 	}
 
 	@Override
@@ -340,18 +348,18 @@ public abstract class MemoryWindow {
     }// end ShortVariable
 
     public static final class IntArrayVariable extends
-	    Variable<int[], IntArrayVariable> {
+    Variable<int[], IntArrayVariable> {
 	private final int arrayLen;// Keep for automatic size calculation
 
 	public IntArrayVariable(int arrayLen) {
 	    this.arrayLen = arrayLen;
 	}
-	
+
 	@Override
 	public IntArrayVariable set(int objectIndex, int[] value) {
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().putInts(logicalByteOffsetWithinObject().intValue() + objectIndex
-			* parent.getObjectSizeInBytes(),value);
+		    * parent.getObjectSizeInBytes(),value);
 	    return this;
 	}
 
@@ -359,7 +367,7 @@ public abstract class MemoryWindow {
 		int[] value) {
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().putInts(logicalByteOffsetWithinObject().intValue() + offsetInInts * 4 + objectIndex
-			* parent.getObjectSizeInBytes(),value);
+		    * parent.getObjectSizeInBytes(),value);
 	    return this;
 	}// end set(...)
 
@@ -377,14 +385,14 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().putInt(
 		    logicalByteOffsetWithinObject().intValue() + arrayIndex * 4 + objectIndex
-			    * parent.getObjectSizeInBytes(), value);
+		    * parent.getObjectSizeInBytes(), value);
 	}
 
 	public int get(int objectIndex, int arrayIndex) {
 	    final MemoryWindow parent = getParent();
 	    return parent.getContextualBuffer().getInt(
 		    logicalByteOffsetWithinObject().intValue() + arrayIndex * 4 + objectIndex
-			    * parent.getObjectSizeInBytes());
+		    * parent.getObjectSizeInBytes());
 	}
 
 	public IntArrayVariable setAt(int objectIndex, int offsetInInts,
@@ -395,13 +403,13 @@ public abstract class MemoryWindow {
 		buffer[i]=itr.next().intValue();
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().putInts(logicalByteOffsetWithinObject().intValue() + offsetInInts * 4 + objectIndex
-			* parent.getObjectSizeInBytes(),buffer);
+		    * parent.getObjectSizeInBytes(),buffer);
 	    return this;
 	}
     }// end IntArrayVariable
 
     public static final class VEC4ArrayVariable extends
-	    Variable<int[], VEC4ArrayVariable> {
+    Variable<int[], VEC4ArrayVariable> {
 	private final int arrayLen;// Keep for automatic size calculation
 
 	public VEC4ArrayVariable(int arrayLen) {
@@ -414,7 +422,7 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    final IByteBuffer contextualBuffer = parent.getContextualBuffer();
 	    final int startIndexInBytes = logicalByteOffsetWithinObject().intValue() + objectIndex
-			* parent.getObjectSizeInBytes();
+		    * parent.getObjectSizeInBytes();
 	    final int endIndexInBytes = startIndexInBytes + value.length * 4;
 	    for (int indexInBytes = startIndexInBytes; indexInBytes < endIndexInBytes; indexInBytes += 4)
 		contextualBuffer.putInt(indexInBytes, value[valueIndex++]);
@@ -427,7 +435,7 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    final IByteBuffer contextualBuffer = parent.getContextualBuffer();
 	    final int startIndexInBytes = logicalByteOffsetWithinObject().intValue() + offsetInVEC4s * 16 + objectIndex
-			* parent.getObjectSizeInBytes();
+		    * parent.getObjectSizeInBytes();
 	    final int endIndexInBytes = startIndexInBytes + value.length * 4;
 	    for (int indexInBytes = startIndexInBytes; indexInBytes < endIndexInBytes; indexInBytes+= 4)
 		contextualBuffer.putInt(
@@ -447,7 +455,7 @@ public abstract class MemoryWindow {
     }// end VEC4ArrayVariable
 
     public static final class ByteArrayVariable extends
-	    Variable<ByteBuffer, ByteArrayVariable> {
+    Variable<ByteBuffer, ByteArrayVariable> {
 	private final int arrayLen;// Keep for automatic size calculation
 
 	public ByteArrayVariable(int arrayLen) {
@@ -459,7 +467,7 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().put(
 		    logicalByteOffsetWithinObject().intValue() + objectIndex
-			    * parent.getObjectSizeInBytes(), value);
+		    * parent.getObjectSizeInBytes(), value);
 	    return this;
 	}
 
@@ -468,7 +476,7 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().put(
 		    offsetInBytes + logicalByteOffsetWithinObject().intValue() + objectIndex
-			    * parent.getObjectSizeInBytes(), value);
+		    * parent.getObjectSizeInBytes(), value);
 	    return this;
 	}
 
@@ -486,12 +494,12 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().put(
 		    logicalByteOffsetWithinObject().intValue() + arrayIndex + objectIndex
-			    * parent.getObjectSizeInBytes(), value);
+		    * parent.getObjectSizeInBytes(), value);
 	}
     }// end ByteArrayVariable
 
     public static final class ShortArrayVariable extends
-	    Variable<ShortBuffer, ShortArrayVariable> {
+    Variable<ShortBuffer, ShortArrayVariable> {
 	private final int arrayLen;// Keep for automatic size calculation
 
 	public ShortArrayVariable(int arrayLen) {
@@ -522,12 +530,12 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    parent.getContextualBuffer().putShort(
 		    logicalByteOffsetWithinObject().intValue() + arrayIndex * 2 + objectIndex
-			    * parent.getObjectSizeInBytes(), value);
+		    * parent.getObjectSizeInBytes(), value);
 	}
     }// end ShortArrayVariable
 
     public static final class Double2FloatArrayVariable extends
-	    Variable<double[], Double2FloatArrayVariable> {
+    Variable<double[], Double2FloatArrayVariable> {
 	private int arrayLen = 0;
 
 	public Double2FloatArrayVariable(int arrayLen) {
@@ -539,7 +547,7 @@ public abstract class MemoryWindow {
 	    final MemoryWindow parent = getParent();
 	    final IByteBuffer contextualByteBuffer = parent.getContextualBuffer();
 	    final int initialOffset = logicalByteOffsetWithinObject().intValue() + objectIndex
-			              * parent.getObjectSizeInBytes();
+		    * parent.getObjectSizeInBytes();
 	    final int endIndex      = initialOffset + arrayLen * 4;
 	    int       index         = 0;
 	    for (int i = initialOffset; i < endIndex; i+= 4) {
@@ -555,7 +563,7 @@ public abstract class MemoryWindow {
 	    for (int i = 0; i < arrayLen; i++) {
 		result[i] = parent.getContextualBuffer().getFloat(
 			i * 4 + logicalByteOffsetWithinObject().intValue() + objectIndex
-				* parent.getObjectSizeInBytes());
+			* parent.getObjectSizeInBytes());
 	    }
 	    return result;
 	}
@@ -607,59 +615,59 @@ public abstract class MemoryWindow {
      * @return the reporter
      */
     public Reporter getReporter() {
-        return reporter;
+	return reporter;
     }
 
     /**
      * @param reporter the reporter to set
      */
     public MemoryWindow setReporter(Reporter reporter) {
-        this.reporter = reporter;
-        return this;
+	this.reporter = reporter;
+	return this;
     }
-    
+
     public void compact(){
 	getIndexPool().compact();
     }
 
     public String getDebugName() {
-        return debugName;
+	return debugName;
     }
 
     public void setDebugName(String debugName) {
-        this.debugName = debugName;
+	this.debugName = debugName;
     }
 
     public int getMinFreeDelayMillis() {
-        return minFreeDelayMillis;
+	return minFreeDelayMillis;
     }
 
     public void setMinFreeDelayMillis(int minFreeDelayMillis) {
-        this.minFreeDelayMillis = minFreeDelayMillis;
+	this.minFreeDelayMillis = minFreeDelayMillis;
     }
 
     public int getMaxFreeDelayMillis() {
-        return maxFreeDelayMillis;
+	return maxFreeDelayMillis;
     }
 
     public void setMaxFreeDelayMillis(int maxFreeDelayMillis) {
-        this.maxFreeDelayMillis = maxFreeDelayMillis;
+	this.maxFreeDelayMillis = maxFreeDelayMillis;
     }
 
     public MemoryWindowFreeingService getFreeingService() {
-        return freeingService;
+	return freeingService;
     }
 
     IndexPool getIndexPool() {
 	if(indexPool == null)
 	    indexPool = new IndexPool();
-        return indexPool;
+	return indexPool;
     }
 
     void setIndexPool(IndexPool indexPool) {
-        this.indexPool = indexPool;
+	this.indexPool = indexPool;
     }
-    
+
     public MemoryWindow newContextWindow(){
 	if(isContext())
 	    throw new IllegalStateException("This memorywindow is already a context.");
@@ -681,28 +689,28 @@ public abstract class MemoryWindow {
     IByteBuffer getContextualBuffer() {
 	if(ioBuffer == null)
 	    ioBuffer = getNoncontextualBuffer();
-        return ioBuffer;
+	return ioBuffer;
     }
 
     void setContextualBuffer(IByteBuffer ioBuffer) {
-        this.ioBuffer = ioBuffer;
+	this.ioBuffer = ioBuffer;
     }
-    
+
     public void flush(){
 	final IByteBuffer buffer = getContextualBuffer();
 	if(buffer instanceof PagedByteBufferContext){
 	    final PagedByteBufferContext pbb = (PagedByteBufferContext)buffer;
 	    try{pbb.flush();}
-	catch(Exception e){e.printStackTrace();}
+	    catch(Exception e){e.printStackTrace();}
 	} else
 	    throw new IllegalStateException("Tried to flush a non-contextual MemoryWindow.");
     }//end flush()
 
     boolean isContext() {
-        return isContext;
+	return isContext;
     }
 
     void setContext(boolean isContext) {
-        this.isContext = isContext;
+	this.isContext = isContext;
     }
 }// end MemoryWindow

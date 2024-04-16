@@ -694,6 +694,7 @@ public class RendererFactory {
 	final Renderer result = acquireRenderer();
 	assert !rendererPortalIndexMap.containsKey(result);
 	rendererPortalIndexMap.put(result, index);
+	result.setIntermittent(true);
 	result.setRenderingTarget(portalFrameBuffers[index]);
 	printPortalState();
 	return new Pair<Renderer,Integer>(result,index);
@@ -703,6 +704,7 @@ public class RendererFactory {
 	portalFrameBufferIndexPool.free(getPortalTextureIDOf(rendererToRelease));
 	releaseRenderer(rendererToRelease);
 	rendererPortalIndexMap.remove(rendererToRelease);
+	rendererToRelease.setIntermittent(false);
 	printPortalState();
     }//end releasePortalRenderer(...)
     

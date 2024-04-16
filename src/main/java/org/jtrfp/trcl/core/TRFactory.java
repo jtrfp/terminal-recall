@@ -16,6 +16,8 @@ package org.jtrfp.trcl.core;
 import java.awt.Color;
 import java.beans.PropertyChangeListener;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.trcl.RenderableSpacePartitioningGrid;
@@ -110,15 +112,19 @@ public final class TRFactory implements FeatureFactory<Features>{
      * advised to defer calling this method until the program is at its fullest (post-loading) state to avoid 
      * unnecessary cache misses.
      * 
+     * REINSTATED 2024: This hack solves more problems than it causes and it will stay until there is a redesign.
+     * 
      * Idea adapted from:
      * http://stackoverflow.com/questions/3785713/how-to-make-the-java-system-release-soft-references>
      * 
      * @since Sep 15, 2014
      */
+    private static final AtomicBoolean isInNuclearGC = new AtomicBoolean(false);
     public static void nuclearGC(){
+	System.err.println("nuclearGC...");
 	System.gc();
 	System.runFinalization();
-	/*
+	
 	try{
 	    synchronized(isInNuclearGC){
 		if(isInNuclearGC.get())
@@ -137,11 +143,9 @@ public final class TRFactory implements FeatureFactory<Features>{
 	    isInNuclearGC.set(false);
 	    isInNuclearGC.notifyAll();
 	}
-	*/
+	
     }//end nuclearGC()
-
-    //private static AtomicBoolean isInNuclearGC = new AtomicBoolean(false);
-
+    
     public static double rolloverDistance(double distance) {
 	if(distance > TRFactory.mapWidth/2)
 	    distance = TRFactory.mapWidth-distance;

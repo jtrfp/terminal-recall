@@ -14,8 +14,10 @@ package org.jtrfp.trcl.core;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
@@ -74,6 +76,9 @@ public class ThreadManager {
     public final Queue<TRFutureTask<?>>    activeGPUMemAccessTasks = new ArrayBlockingQueue<TRFutureTask<?>>(30000,true);
     public final ArrayList<Callable<?>>repeatingGPUMemAccessTasks  = new ArrayList<Callable<?>>();
     public final List<Callable<?>>repeatingGLTasks	           = new CopyOnWriteArrayList<Callable<?>>();
+    public final List<Callable<?>>intermittentGLTasks	           = new CopyOnWriteArrayList<Callable<?>>();
+    public final Deque<Callable<?>>intermittentGLTasksToExecute	   = new ArrayDeque<Callable<?>>();
+    private static long maxIntermittentExecutionTimeMS		   = 20;
     private long timeElapsedInMillisSinceLastGameTickAfterLastPause = 0L;
     
     private final Submitter<TRFutureTask<?>> pendingGPUMemAccessTaskSubmitter = new AbstractSubmitter<TRFutureTask<?>>(){
@@ -257,6 +262,15 @@ public class ThreadManager {
 	     ///////// activeGPUMemAccessTasks should be empty beyond this
 	    assert activeGPUMemAccessTasks.isEmpty() : "ThreadManager.activeGPUMemAccessTasks intolerably not empty.";
 	    //// GL ONLY
+	    synchronized(intermittentGLTasksToExecute) {
+		synchronized(intermittentGLTasks) {
+		    if(intermittentGLTasksToExecute.isEmpty())
+			intermittentGLTasksToExecute.addAll(intermittentGLTasks);
+		}//end sync(intermittentGLTasks)
+		if(!intermittentGLTasksToExecute.isEmpty())
+		 intermittentGLTasksToExecute.remove().call();
+	    }//end sync(GL Tasks To Execute)
+	    
 	    //synchronized(repeatingGLTasks){
 	     for(Callable<?> c:repeatingGLTasks)
 		c.call();//}
@@ -318,6 +332,22 @@ public class ThreadManager {
 	threadPool.submit(result);
 	return result;
     }
+    public void addIntermittentGLTask(Callable<?> task) {
+	if(task==null)
+	    throw new NullPointerException("Passed task intolerably null.");
+	synchronized(intermittentGLTasks){
+	 if(intermittentGLTasks.contains(task))
+	    return;
+	 intermittentGLTasks.add(task);}
+    }//end addIntermittentGLTask(...)
+    
+    public void removeIntermittentGLTask(Callable<?> task) {
+	if(task==null)
+	    throw new NullPointerException("Passed task intolerably null.");
+	synchronized(intermittentGLTasks){
+	 intermittentGLTasks.remove(task);}
+    }//end removeIntermittentGLTask(...)
+    
     public void addRepeatingGLTask(Callable<?> task){
 	if(task==null)
 	    throw new NullPointerException("Passed task intolerably null.");

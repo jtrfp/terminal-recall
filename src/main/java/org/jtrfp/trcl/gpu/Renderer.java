@@ -124,6 +124,7 @@ public final class Renderer {
     private		Color			sunColor = Color.white, ambientColor = Color.gray;
     private		float			fogScalar=1;
     private		Vector3D		sunVector = new Vector3D(1,1,1).normalize();
+    private		boolean			intermittent = false;
     
     
     private static final Adapter<Positionable,PositionedRenderable> castingAdapter = new Adapter<Positionable,PositionedRenderable>(){
@@ -371,13 +372,20 @@ public final class Renderer {
     public void setEnabled(boolean enabled) {
 	if(this.enabled == enabled)
 	    return;
-        this.enabled = enabled;
-        if(isEnabled())
-         threadManager.addRepeatingGLTask(render);
-        else
-         threadManager.removeRepeatingGLTask(render);
-        getCamera().setActive(isEnabled());
-    }
+	this.enabled = enabled;
+	if(!isIntermittent()) {
+	    if(isEnabled())
+		threadManager.addRepeatingGLTask(render);
+	    else
+		threadManager.removeRepeatingGLTask(render);
+	} else {
+	    if(isEnabled())
+		threadManager.addIntermittentGLTask(render);
+	    else
+		threadManager.removeIntermittentGLTask(render);
+	}
+	getCamera().setActive(isEnabled());
+    }//end setEnabled(...)
     
     private void sendRendererPageTable(){
 	//final Renderer renderer = tr.mainRenderer;
@@ -850,4 +858,12 @@ public final class Renderer {
 		    return result;
 		}
 	    });
+
+    public boolean isIntermittent() {
+        return intermittent;
+    }
+
+    public void setIntermittent(boolean intermittent) {
+        this.intermittent = intermittent;
+    }
 }//end Renderer

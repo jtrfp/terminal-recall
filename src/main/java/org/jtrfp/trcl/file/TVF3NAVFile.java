@@ -91,6 +91,7 @@ public class TVF3NAVFile extends SelfParsingFile implements NAVData {
 	public String getProximitySoundFile() {return null;}
 	public void setProximitySoundFile(String newPriority) {}
 	public String getCompletionText() {return null;}
+	public void setCompletionText(String text) {throw new UnsupportedOperationException("TV/F3 does not use completion text in its NAV objectives.");}
 	public void setCompletionTextFile(String newPriority) {}
 	public String getCompletionSoundFile() {return null;}
 	public void setCompletionSoundFile(String newPriority) {}

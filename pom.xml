@@ -77,12 +77,6 @@
 	</reporting>
 
   <repositories>
-    <!--<repository>
-            <id>jogamp-remote</id>
-            <name>jogamp test mirror</name>
-            <url>https://www.jogamp.org/deployment/maven/</url>
-            <layout>default</layout>
-     </repository>-->
      <repository>
     		<id>jitpack.io</id>
     		<url>https://jitpack.io</url>
@@ -115,11 +109,6 @@
 			<artifactId>jtrfp</artifactId>
 			<version>0.1.0</version>
 		</dependency>
-		<!--<dependency>
-			<groupId>org.jtrfp</groupId>
-			<artifactId>jfdt</artifactId>
-			<version>1.2.</version>
-		</dependency>-->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>

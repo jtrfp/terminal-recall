@@ -77,15 +77,24 @@
 	</reporting>
 
   <repositories>
-    <repository>
+    <!--<repository>
             <id>jogamp-remote</id>
             <name>jogamp test mirror</name>
             <url>https://www.jogamp.org/deployment/maven/</url>
             <layout>default</layout>
-          </repository>
+     </repository>-->
+     <repository>
+    		<id>jitpack.io</id>
+    		<url>https://jitpack.io</url>
+	</repository>
   </repositories>
 
 	<dependencies>
+		<dependency>
+    		<groupId>org.jtrfp</groupId>
+    		<artifactId>jfdt</artifactId>
+    		<version>1.2.0-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>org.jogamp.gluegen</groupId>
 			<artifactId>gluegen-rt-main</artifactId>
@@ -106,11 +115,11 @@
 			<artifactId>jtrfp</artifactId>
 			<version>0.1.0</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>org.jtrfp</groupId>
 			<artifactId>jfdt</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
-		</dependency>
+			<version>1.2.</version>
+		</dependency>-->
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>

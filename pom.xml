@@ -91,9 +91,9 @@
 
 	<dependencies>
 		<dependency>
-    		<groupId>org.jtrfp</groupId>
+    		<groupId>com.github.jtrfp</groupId>
     		<artifactId>jfdt</artifactId>
-    		<version>1.2.0-SNAPSHOT</version>
+    		<version>master-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jogamp.gluegen</groupId>

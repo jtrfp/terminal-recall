@@ -228,7 +228,7 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>install</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>
@@ -236,7 +236,6 @@
 							<outputDirectory>${project.build.directory}/lib</outputDirectory>
 						</configuration>
 					</execution>
-
 				</executions>
 			</plugin>
 			<plugin>
@@ -329,12 +328,9 @@
 							</classPath>
 							<jre>
 								<minVersion>11.0.1</minVersion>
-								<opts>
-									<opt>-Djava.endorsed.dirs=./endorsed</opt>
-								</opts>
 							</jre>
 							<versionInfo>
-								<fileVersion>0.0.0.1</fileVersion>
+								<fileVersion>0.0.1.0</fileVersion>
 								<txtFileVersion>${buildNumber}</txtFileVersion>
 								<fileDescription>Enhancement engine for Terminal Velocity and
 									Fury3</fileDescription>

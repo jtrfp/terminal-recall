@@ -692,13 +692,15 @@ public class ResourceManager{
 	
 	public TDFFile getTDFData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
 		InputStream is = getInputStreamFromResource("DATA\\"+fileName);
-		TDFFile result = new Parser().readToNewBean(is, TDFFile.class);
+		//TDFFile result = new Parser().readToNewBean(is, TDFFile.class);
+		TDFFile result = new TDFFile(is);
 		is.close();
 		return result;
 		}
 	public TNLFile getTNLData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
 		InputStream is = getInputStreamFromResource("DATA\\"+fileName);
-		TNLFile result = new Parser().readToNewBean(is, TNLFile.class);
+		//TNLFile result = new Parser().readToNewBean(is, TNLFile.class);
+		TNLFile result = new TNLFile(is);
 		is.close();
 		return result;
 		}
@@ -740,7 +742,8 @@ public class ResourceManager{
 
 	public PUPFile getPUPData(String fileName) throws IllegalAccessException, UnrecognizedFormatException, FileNotFoundException, FileLoadException, IOException{
 		InputStream is = getInputStreamFromResource("DATA\\"+fileName);
-		PUPFile result = new Parser().readToNewBean(is, PUPFile.class);
+		//PUPFile result = new Parser().readToNewBean(is, PUPFile.class);
+		PUPFile result = new PUPFile(is);
 		is.close();
 		return result;
 		}
@@ -864,7 +867,8 @@ public class ResourceManager{
 	
 	public LTEFile getLTE(String resourceNameWithDirectoryPrefix) throws IOException, IllegalAccessException, UnrecognizedFormatException, FileLoadException{
 	    final InputStream is = getInputStreamFromResource(resourceNameWithDirectoryPrefix);
-	    final LTEFile result = new Parser().readToNewBean(is, LTEFile.class);
+	    //final LTEFile result = new Parser().readToNewBean(is, LTEFile.class);
+	    final LTEFile result = new LTEFile(is);
 	    is.close();
 	    return result;
 	}

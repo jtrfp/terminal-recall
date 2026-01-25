@@ -13,14 +13,22 @@
 package org.jtrfp.trcl.file;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.commons.math3.geometry.euclidean.threed.Vector3D;
 import org.jtrfp.jfdt.Parser;
-import org.jtrfp.jfdt.ThirdPartyParseable;
+import org.jtrfp.jfdt.SelfParsingFile;
 import org.jtrfp.jfdt.UnrecognizedFormatException;
 
-public class LTEFile implements ThirdPartyParseable {
+public class LTEFile extends SelfParsingFile {
     private byte [] lteData;
+    
+    public LTEFile() {super();}
+    
+    public LTEFile(InputStream is) throws IOException, IllegalAccessException {
+	super(is);
+    }
     @Override
     public void describeFormat(Parser parser)
 	    throws UnrecognizedFormatException {

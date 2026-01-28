@@ -53,6 +53,8 @@ public class JVM {
 	    //Seems to work better than the official way of querying assertion ability.
 	    boolean useAssertions = false;
 	    assert useAssertions = true;
+	    boolean isOpenJ9 = vmName.toLowerCase().contains("openj9");
+	    System.out.println("isOpenJ9? "+isOpenJ9+". vmnamelow="+vmName.toLowerCase());
 	    System.out
 		    .println("Overriding the default JVM settings. If you wish to manually set the JVM settings, include the `-Dorg.jtrfp.trcl.bypassConfigure=true` flag in the java command.");
 	    String executable = isRunningFromJar() ? "-jar RunMe.jar"
@@ -90,6 +92,9 @@ public class JVM {
 	    //UNIVERSAL OPTS
 	    cmd+="-Xms512m ";
 	    cmd+="-Xmx512m ";
+	    
+	    if(isOpenJ9)
+		    cmd+="-Xdump:none:events=systhrow,filter=java/lang/OutOfMemoryError ";
 
 	    if(useAssertions)
 		cmd+="-ea ";

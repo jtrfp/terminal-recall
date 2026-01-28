@@ -73,13 +73,13 @@ public class JVM {
 		cmd+="-XX:+DoEscapeAnalysis ";
 		//cmd+="-XX:+UseFastAccessorMethods ";
 		//cmd+="-XX:+UseParNewGC ";
-		cmd+="--illegal-access=permit ";
+		//cmd+="--illegal-access=permit ";
 
 		//cmd+="-XX:+UseConcMarkSweepGC ";
 		cmd+="-XX:MaxGCPauseMillis=5 ";
 		//cmd+="-XX:+AggressiveOpts ";
 
-		cmd+="-XX:+UseBiasedLocking ";
+		//cmd+="-XX:+UseBiasedLocking ";
 		cmd+="-XX:+AlwaysPreTouch ";
 		cmd+="-XX:ParallelGCThreads=4 ";
 		cmd+="-XX:+UseCompressedOops ";

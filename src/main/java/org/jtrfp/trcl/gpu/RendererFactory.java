@@ -351,12 +351,6 @@ public class RendererFactory {
 			.attachDrawTexture(layerAccumulatorTexture0, GL3.GL_COLOR_ATTACHMENT0)
 			.attachDrawTexture(layerAccumulatorTexture1, GL3.GL_COLOR_ATTACHMENT1)
 			.attachDepthTexture(opaqueDepthTexture)
-			/*
-			.attachDrawTexture2D(depthQueueTexture, 
-				GL3.GL_COLOR_ATTACHMENT0,GL3.GL_TEXTURE_2D_MULTISAMPLE)
-			.attachDepthTexture2D(depthQueueStencil)
-			.attachStencilTexture2D(depthQueueStencil)
-			*/
 			.setDrawBufferList(GL3.GL_COLOR_ATTACHMENT0, GL3.GL_COLOR_ATTACHMENT1);
 		if(gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER) != GL3.GL_FRAMEBUFFER_COMPLETE){
 		    throw new RuntimeException("Depth queue framebuffer setup failure. OpenGL code "+gl.glCheckFramebufferStatus(GL3.GL_FRAMEBUFFER));

@@ -151,16 +151,6 @@ public final class Renderer {
 	camera.setDebugName(getDebugName());
 	//setCamera(tr.getWorld().newCamera());//TODO: Use after redesign
 	System.out.println("...Done.");
-	/*System.out.println("Initializing RenderList...");
-	renderList = new TRFutureTask<RenderList>(new Callable<RenderList>(){
-	    @Override
-	    public RenderList call() throws Exception {
-		final RenderList rl = new RenderList(gpu, Renderer.this, getObjectListWindow(), getThreadManager());
-		rl.setReporter(getReporter());
-		return rl;
-	    }});
-	threadManager.threadPool.submit(renderList);*/
-
 	if(getSkyCube() == null)
 	    setSkyCube(new SkyCube(gpu));
 	relevantPositioned =

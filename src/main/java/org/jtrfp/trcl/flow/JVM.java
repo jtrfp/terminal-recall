@@ -23,17 +23,11 @@ import java.util.Map.Entry;
 public class JVM {
     private String []args;
     private static final boolean runningFromJar = new File("RunMe.jar").exists();
-
-    /**
-     * @return the args
-     */
+    
     public String []getArgs() {
         return args;
     }
-
-    /**
-     * @param args the args to set
-     */
+    
     public JVM setArgs(String []args) {
         this.args = args;
         return this;
@@ -54,7 +48,6 @@ public class JVM {
 	    boolean useAssertions = false;
 	    assert useAssertions = true;
 	    boolean isOpenJ9 = vmName.toLowerCase().contains("openj9");
-	    System.out.println("isOpenJ9? "+isOpenJ9+". vmnamelow="+vmName.toLowerCase());
 	    System.out
 		    .println("Overriding the default JVM settings. If you wish to manually set the JVM settings, include the `-Dorg.jtrfp.trcl.bypassConfigure=true` flag in the java command.");
 	    String executable = isRunningFromJar() ? "-jar RunMe.jar"
@@ -69,19 +62,8 @@ public class JVM {
 	    cmd+="-Dcom.sun.management.jmxremote ";
 	    
 	    if( is64Bit && isServerVM) {
-		//Commented out because some VMs either don't support them or are implicit features today.
-		
-		//cmd+="-XX:+UnlockExperimentalVMOptions ";
 		cmd+="-XX:+DoEscapeAnalysis ";
-		//cmd+="-XX:+UseFastAccessorMethods ";
-		//cmd+="-XX:+UseParNewGC ";
-		//cmd+="--illegal-access=permit ";
-
-		//cmd+="-XX:+UseConcMarkSweepGC ";
 		cmd+="-XX:MaxGCPauseMillis=5 ";
-		//cmd+="-XX:+AggressiveOpts ";
-
-		//cmd+="-XX:+UseBiasedLocking ";
 		cmd+="-XX:+AlwaysPreTouch ";
 		cmd+="-XX:ParallelGCThreads=4 ";
 		cmd+="-XX:+UseCompressedOops ";

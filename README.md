@@ -21,7 +21,7 @@ This is a [cleanroom](https://en.wikipedia.org/wiki/Clean_room_design) re-implem
 
 ### Build Instructions
 You will need:
-* Temurin 11 JDK (https://adoptium.net/)
+* Java 11 JDK or later (https://adoptium.net/) (https://openjdk.org/) (https://www.oracle.com/java/technologies/downloads/)
 * Git (http://git-scm.com/downloads)
 * Maven (https://maven.apache.org/download.cgi)
 * Windows or Linux. Linux is much easier.

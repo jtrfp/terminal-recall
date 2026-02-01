@@ -1,6 +1,6 @@
 /*******************************************************************************
  * This file is part of TERMINAL RECALL
- * Copyright (c) 2012-2022 Chuck Ritola
+ * Copyright (c) 2012-2026 Chuck Ritola
  * Part of the jTRFP.org project
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the GNU Public License v3.0
@@ -49,11 +49,14 @@ import lombok.Getter;
 
 @Component
 public class RootWindowFactory implements FeatureFactory<TR> {
-    static {
-	System.setProperty("jogl.disable.openglcore", "false");GLProfile.initSingleton();
-	System.setProperty("awt.useSystemAAFontSettings","lcd");
+	static {
+        //System.setProperty("jogl.debug.GLProfile", "true");
+        //System.setProperty("jogl.debug.NativeLibrary", "true");
+        //System.setProperty("jogl.debug.GLContext", "true");
+        //System.setProperty("jogl.disable.openglcore", "false");//DO NOT USE: Whether true or false, JOGAMP assumes boolean system properties to be 'true' if set at all!
+        System.setProperty("awt.useSystemAAFontSettings","lcd");
 	System.setProperty("swing.aatext", "true");
-	}
+    }
     public static class RootWindow extends JFrame implements Feature<TR>, GLAutoDrawableProvider {
 	/**
 	 * 
@@ -76,13 +79,13 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	
 	public RootWindow(){
 	    super();
-	    final GLWindow w = getGlWindow();
-	    w.addKeyListener(new Newt2AWTKeyListener(RootWindow.this));
-	    
 	    try {
-		SwingUtilities.invokeLater(new Runnable() {
+		SwingUtilities.invokeAndWait(new Runnable() {
 		    @Override
 		    public void run() {
+			GLProfile.initSingleton();
+			final GLWindow w = getGlWindow();
+			w.addKeyListener(new Newt2AWTKeyListener(RootWindow.this));
 			affirmLookAndFeel();
 			setSize(800,600);
 			getGlWindow().addGLEventListener(glEventListener);
@@ -106,11 +109,18 @@ public class RootWindowFactory implements FeatureFactory<TR> {
 	
 	private GLCapabilities createGLCapabilities() {
 	    final GLCapabilities result = new GLCapabilities(getGlProfile());
+        result.setDoubleBuffered(true);
+        result.setHardwareAccelerated(true);
 	    return result;
 	}
 	
 	private GLProfile createGLProfile() {
-	    final GLProfile result = GLProfile.getMaxProgrammable(true);
+        GLProfile result;
+	    try {result = GLProfile.get(GLProfile.GL3);}
+	    catch(Exception e) {
+            System.out.println("GL3 core request failed. Fallback to highest available...");
+            result = GLProfile.getMaxProgrammableCore(true);
+            }
 	    return result;
 	}
 	

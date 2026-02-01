@@ -35,6 +35,7 @@ import org.jtrfp.trcl.Submitter;
 import org.jtrfp.trcl.core.TRFactory.TR;
 import org.jtrfp.trcl.gpu.ProvidesGLThread;
 import org.jtrfp.trcl.gpu.Renderer;
+import org.jtrfp.trcl.gui.RootWindowFactory.RootWindow;
 import org.jtrfp.trcl.obj.Player;
 import org.jtrfp.trcl.obj.PositionedRenderable;
 import org.jtrfp.trcl.obj.RelevantEverywhere;
@@ -207,7 +208,8 @@ public class ThreadManager {
 		try{gameplay();
 		}catch(Exception e){tr.showStopper(e);}
 	    }}, 0, 1000/GAMEPLAY_FPS);
-	animator = new FPSAnimator(tr.getRootWindow().getAutoDrawable(),RENDER_FPS);
+	final RootWindow rw = tr.getRootWindow();//XXX:Keep this above animator setup so that FPSAnimator doesn't call initSingleton() first.
+	animator = new FPSAnimator(rw.getAutoDrawable(),RENDER_FPS);
 	animator.start();
 	tr.getRootWindow().addWindowListener(new WindowAdapter(){//TODO: This should be somewhere else
 	    @Override

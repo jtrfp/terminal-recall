@@ -60,9 +60,9 @@ public final class GLTexture {
     //private final GL3 gl;
     private int []bindingTarget = {GL3.GL_TEXTURE_2D};
     private int internalColorFormat = GL3.GL_RGBA8;
-    private boolean deleted=false;
+    private final boolean[] deleted= {false};
     private static GLProgram textureRenderProgram;
-    private String debugName="UNNAMED";
+    private final String []debugName={"UNNAMED"};
     private final double [] expectedMaxValue = new double[]{1,1,1,1};
     private final double [] expectedMinValue = new double[]{0,0,0,0};
     private int preferredUpdateIntervalMillis = 500;
@@ -75,7 +75,7 @@ public final class GLTexture {
 	    @Override
 	    public Integer execute(GL3 gl) throws Exception {
 		final int tID = GPU.newTextureID(gl);
-		Util.CLEANER.register(GLTexture.this, new CleaningAction(gpu, bindingTarget, tID));
+		Util.CLEANER.register(GLTexture.this, new CleaningAction(gpu, bindingTarget, tID, deleted, debugName));
 		return tID;
 	    }});
 	System.out.println("...Done.");
@@ -86,15 +86,18 @@ public final class GLTexture {
 	private final GPU gpu;
 	private final int [] bindingTarget;
 	private final int textureID;
+	private final boolean [] deleted;
+	private final String [] debugName;
 	
 	@Override
 	public void run() {
 	    try {
-		System.out.println("GLTexture cleaning action...");
+		System.out.println("GLTexture cleaning action. DebugName="+debugName[0]+". manually-deleted? "+deleted[0]);
 		gpu.getGlExecutor().submitToGL(new GLExecutable<Void,GL3>(){
 		    @Override
 		    public Void execute(GL3 gl) throws Exception {
-			deleteImpl(gl, bindingTarget[0], textureID);
+			if(!deleted[0])//If texture IDs get reused, we may end up deleting another texture!
+			    deleteImpl(gl, bindingTarget[0], textureID);
 			return null;
 		    }}).get();
 	    } catch(Throwable t) {t.printStackTrace();}
@@ -244,11 +247,11 @@ public final class GLTexture {
 	if(isDeleted())
 	    return;
 	deleteImpl(gl, bindingTarget[0], getId());
-	deleted=true;
+	deleted[0]=true;
     }
     
     private static void deleteImpl(GL3 gl, int bindingTarget, int textureID) {
-	gl.glBindTexture(bindingTarget, textureID);
+	//gl.glBindTexture(bindingTarget, textureID);
 	gl.glDeleteTextures(1, IntBuffer.wrap(new int[] { textureID }));
     }
 
@@ -356,10 +359,10 @@ public final class GLTexture {
     }*/
 
     /**
-     * @return the deleted
+     * @return true if this texture object was already deleted, false if texture is still valid.
      */
     public boolean isDeleted() {
-        return deleted;
+        return deleted[0];
     }
     
     public GPU getGPU() {
@@ -612,14 +615,14 @@ public final class GLTexture {
      * @return the debugName
      */
     public String getDebugName() {
-        return debugName;
+        return debugName[0];
     }
 
     /**
      * @param debugName the debugName to set
      */
     public GLTexture setDebugName(String debugName) {
-        this.debugName = debugName;
+        this.debugName[0] = debugName;
         return this;
     }
 

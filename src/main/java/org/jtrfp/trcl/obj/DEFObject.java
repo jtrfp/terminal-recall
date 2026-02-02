@@ -88,6 +88,7 @@ import org.jtrfp.trcl.file.BINFile.AnimationControl;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition;
 import org.jtrfp.trcl.file.DEFFile.EnemyDefinition.EnemyLogic;
 import org.jtrfp.trcl.file.DEFFile.EnemyPlacement;
+import org.jtrfp.trcl.file.Powerup;
 import org.jtrfp.trcl.file.Weapon;
 import org.jtrfp.trcl.flow.GameVersion;
 import org.jtrfp.trcl.game.TVF3Game;
@@ -198,6 +199,7 @@ public class DEFObject extends WorldObject {
 	final int numHitBoxes = def.getNumNewHBoxes();
 	final int[] rawHBoxData = def.getHboxVertices();
 	if (numHitBoxes != 0) {
+	    System.out.println("numHitBoxes="+numHitBoxes+" rawHBoxData.length="+rawHBoxData.length);
 	    final HitBox[] boxes = new HitBox[numHitBoxes];
 	    for (int i = 0; i < numHitBoxes; i++) {
 		final HitBox hb = new HitBox();
@@ -910,10 +912,19 @@ public class DEFObject extends WorldObject {
 
 	    addBehavior(new LoopingPositionBehavior());
 	} // end if(mobile)
-	if (def.getPowerup() != null
-		&& Math.random() * 100. < def.getPowerupProbability()) {
-	    addBehavior(new LeavesPowerupOnDeathBehavior(def.getPowerup()));
-	}
+	final Powerup pup = def.getPowerup();
+	if(pup != null) {//null powerups are created by wbnkruin.bin
+	    if(pup.ordinal() > 12) {
+		if(pup.ordinal() == Powerup.values().length-1 || pup == Powerup.Random)//Some versions use -1, some use Random
+		    addBehavior(new LeavesPowerupOnDeathBehavior(Powerup.values()[(int)(Math.random()*7)]));// [0,6]
+		else
+		    throw new IllegalStateException("Powerup ordinal > 12 "+def.getComplexModelFile()+", defIdx="+this.getEnemyPlacement().getDefIndex()+" ordinal="+pup.ordinal()+"("+pup.name()+")");
+	    }else if(Math.random() * 100. < def.getPowerupProbability()) {
+		addBehavior(new LeavesPowerupOnDeathBehavior(pup));
+	    }//end if(leave powerup)
+	} else if(!def.getComplexModelFile().contentEquals("wbnkruin.bin"))//end if(pup != null)
+	    throw new IllegalStateException("Unexpected null Powerup, non-wbnkruin.bin! "+def.getComplexModelFile()+", defIdx="+this.getEnemyPlacement().getDefIndex()+" ordinal="+pup.ordinal()+"("+pup.name()+")");
+	
 	addBehavior(new CollidesWithPlayer());
 	if (!boss)// Boss is too easy to beat by just colliding into it.
 	    addBehavior(new DamagedByCollisionWithPlayer(8024, 250));

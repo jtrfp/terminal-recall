@@ -34,6 +34,9 @@ public class PowerupSystem extends RenderableSpacePartitioningGrid{
 	if(type == Powerup.Random){//Spawn a random powerup
 	    final double numPowerups = Powerup.values().length;
 	    return spawn(ds,Powerup.values()[(int)(Math.random()*numPowerups)]);}
+	final PowerupFactory pf = factories[type.ordinal()];
+	if(pf == null)
+	    throw new IllegalArgumentException("PowerupFactory for the type "+type+" is null (not specified).");
 	return factories[type.ordinal()].spawn(ds);
     }//end spawn(...)
 }//end PluralizedPowerupFactory
